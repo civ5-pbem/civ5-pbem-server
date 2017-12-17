@@ -113,3 +113,172 @@ databaseChangeLog:
         tableName: USER_ACCOUNT
         oldColumnName: TMP_VERSION
         newColumnName: VERSION
+- changeSet:
+    id: 1513727286000-10
+    author: michal@cybulski.me
+    changes:
+    - createTable:
+        tableName: GAME
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: ID
+            type: VARCHAR(255)
+        - column:
+            name: CREATED_AT
+            type: TIMESTAMP
+        - column:
+            name: UPDATED_AT
+            type: TIMESTAMP
+        - column:
+            constraints:
+              nullable: false
+            name: VERSION
+            type: BIGINT(19)
+        - column:
+            constraints:
+              nullable: false
+            name: HOST_ID
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: NAME
+            type: VARCHAR(255)
+        - column:
+            name: DESCRIPTION
+            type: VARCHAR(1024)
+        - column:
+            constraints:
+              nullable: false
+            name: MAP_SIZE
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: GAME_STATE
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: MAX_NUMBER_OF_PLAYERS
+            type: INT(10)
+        - column:
+            constraints:
+              nullable: false
+            name: NUMBER_OF_CITY_STATES
+            type: INT(10)
+    - addForeignKeyConstraint:
+        baseColumnNames: HOST_ID
+        baseTableName: GAME
+        constraintName: FK_GAME_HOST
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER_ACCOUNT
+    - createTable:
+        tableName: PLAYER
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: ID
+            type: VARCHAR(255)
+        - column:
+            name: CREATED_AT
+            type: TIMESTAMP
+        - column:
+            name: UPDATED_AT
+            type: TIMESTAMP
+        - column:
+            constraints:
+              nullable: false
+            name: VERSION
+            type: BIGINT(19)
+        - column:
+            constraints:
+              nullable: false
+            name: GAME_ID
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: PLAYER_NUMBER
+            type: INT(10)
+        - column:
+            constraints:
+              nullable: false
+            name: CIVILIZATION
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: PLAYER_TYPE
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: HUMAN_USER_ACCOUNT_ID
+            type: VARCHAR(255)
+    - addForeignKeyConstraint:
+        baseColumnNames: GAME_ID
+        baseTableName: PLAYER
+        constraintName: FK_PLAYER_GAME_ID
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: GAME
+    - addForeignKeyConstraint:
+        baseColumnNames: HUMAN_USER_ACCOUNT_ID
+        baseTableName: PLAYER
+        constraintName: FK_PLAYER_HUMAN_USER_ACCOUNT
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER_ACCOUNT
+    - addUniqueConstraint:
+        columnNames: GAME_ID,PLAYER_NUMBER
+        tableName: PLAYER
+        constraintName: UK_PLAYER_GAME_ID_PLAYER_NUMBER
+- changeSet:
+    id: 1513730470000-11
+    author: michal@cybulski.me
+    context: test
+    changes:
+    - insert:
+        tableName: USER_ACCOUNT
+        columns:
+        - column:
+            name: ID
+            value: '3942c91c-c502-4be8-8b74-a8a651d531a5'
+        - column:
+            name: CREATED_AT
+            valueDate: '2017-12-20T01:45:55'
+        - column:
+            name: UPDATED_AT
+            valueDate: '2017-12-20T01:45:55'
+        - column:
+            name: VERSION
+            value: 1
+        - column:
+            name: EMAIL
+            value: 'test@email.com'
+        - column:
+            name: USERNAME
+            value: 'testuser'
+        - column:
+            name: CURRENT_ACCESS_TOKEN
+            value: '2c43f012-dc2b-4d5d-a0be-769568d25160'
+        - column:
+            name: REGISTRATION_CONFIRMED
+            valueBoolean: false
+    - insert:
+        tableName: USER_ACCOUNT_ROLES
+        columns:
+        - column:
+            name: USER_ACCOUNT_ID
+            value: '3942c91c-c502-4be8-8b74-a8a651d531a5'
+        - column:
+            name: ROLES
+            value: 'ROLE_USER'

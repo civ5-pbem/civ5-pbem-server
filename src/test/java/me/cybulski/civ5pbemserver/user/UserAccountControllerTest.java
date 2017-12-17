@@ -72,4 +72,25 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.roles.length()").value(1))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }
+
+    @Test
+    public void whenTestUserVisitsCurrent_thenTestUserIsReturned() throws Exception {
+        // given
+        String email = "test@email.com";
+
+        // and
+        UserAccount userAccount = userAccountApplicationService.findUserByEmail(email)
+                                          .orElseThrow(RuntimeException::new);
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/user-accounts/current"), userAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.roles.length()").value(1))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
+    }
 }

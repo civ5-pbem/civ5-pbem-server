@@ -30,6 +30,7 @@ public class UserAccount extends BaseEntity {
     @Getter
     private String username;
 
+    @Getter
     @ElementCollection
     private Set<String> roles;
 

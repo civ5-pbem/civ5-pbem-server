@@ -3,7 +3,7 @@ package me.cybulski.civ5pbemserver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.cybulski.civ5pbemserver.user.UserAccount;
-import me.cybulski.civ5pbemserver.user.dto.RegisterInputDTO;
+import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,13 +26,16 @@ public abstract class WebMvcIntegrationTest extends IntegrationTest{
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected UserAccountApplicationService userAccountApplicationService;
+
     protected MockHttpServletRequestBuilder prepareGet(String url) {
         return MockMvcRequestBuilders
                        .get(URI.create(url))
                        .contentType(APPLICATION_JSON);
     }
 
-    protected MockHttpServletRequestBuilder preparePost(String url, RegisterInputDTO data) throws JsonProcessingException {
+    protected MockHttpServletRequestBuilder preparePost(String url, Object data) throws JsonProcessingException {
         return MockMvcRequestBuilders
                        .post(URI.create(url))
                        .content(objectMapper.writeValueAsString(data))
@@ -42,5 +45,9 @@ public abstract class WebMvcIntegrationTest extends IntegrationTest{
     protected MockHttpServletRequestBuilder authenticated(MockHttpServletRequestBuilder builder,
                                                           UserAccount userAccount) {
         return builder.header("Access-Token", userAccount.getCurrentAccessToken());
+    }
+
+    protected UserAccount getTestUserAccount() {
+        return userAccountApplicationService.findUserByEmail("test@email.com").orElseThrow(RuntimeException::new);
     }
 }

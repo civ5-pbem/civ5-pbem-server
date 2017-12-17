@@ -38,7 +38,7 @@ class DefaultUserDetailsService implements UserDetailsService {
 
     private User convertToUser(UserAccount userAccount) {
         ArrayList<SimpleGrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_USER"));
+        userAccount.getRoles().forEach(role -> roles.add(new SimpleGrantedAuthority(role)));
 
         return new User(userAccount.getEmail(), userAccount.getCurrentAccessToken(), roles);
     }
