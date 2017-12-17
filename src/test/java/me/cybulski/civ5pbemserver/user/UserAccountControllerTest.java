@@ -21,10 +21,9 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
     @Test
     public void whenUserRegisters_thenNewUserAccountIsCreated() throws Exception {
         // given
-        String email = "some@email.com";
+        String email = "michal@cybulski.me";
         RegisterInputDTO data = RegisterInputDTO.builder()
                 .email(email)
-                .password("password")
                 .build();
 
         // when
@@ -33,8 +32,7 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
         // then
         resultAction
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.accessToken").isString());
+                .andExpect(jsonPath("$.email").value(email));
     }
 
     @Test
@@ -54,15 +52,15 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
     @Test
     public void whenRegisteredUserVisitsCurrent_thenUserIsReturned() throws Exception {
         // given
-        String email = "some@email.com";
+        String email = "michal@cybulski.me";
 
         // and
-        userAccountApplicationService.registerUserAccount(email, "password");
+        userAccountApplicationService.registerUserAccount(email);
+        UserAccount userAccount = userAccountApplicationService.findUserByEmail(email).get();
 
         // when
-        ResultActions resultActions = mockMvc.perform(
-                authenticated(prepareGet("/user-accounts/current"),
-                userAccountApplicationService.findUserByEmail(email).get()));
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/user-accounts/current"), userAccount));
 
         // then
         resultActions

@@ -1,6 +1,18 @@
 spring:
+  profiles:
+    active:
   datasource:
     driver-class-name: org.h2.Driver
-    url: "jdbc:h2:~/database;DB_CLOSE_ON_EXIT=FALSE"
+    url: "jdbc:h2:./database;DB_CLOSE_ON_EXIT=FALSE"
     username: "civ5"
     password: "civ5"
+  jpa:
+    hibernate:
+      ddl-auto: create
+  mail:
+    host:
+    username:
+    password:
+
+civ5:
+  mail.from:

@@ -28,12 +28,10 @@ class UserAccountController {
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = "application/json")
     public RegisterOutputDTO register(@RequestBody @Validated RegisterInputDTO registerInputDTO) {
         UserAccount newUserAccount = userAccountApplicationService.registerUserAccount(
-                registerInputDTO.getEmail(),
-                registerInputDTO.getPassword());
+                registerInputDTO.getEmail());
 
         return RegisterOutputDTO.builder()
                        .email(newUserAccount.getEmail())
-                       .accessToken(newUserAccount.getCurrentAccessToken())
                        .build();
     }
 

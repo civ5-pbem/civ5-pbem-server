@@ -1,14 +1,13 @@
 package me.cybulski.civ5pbemserver.user;
 
-import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import lombok.*;
+import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.Set;
 
 /**
@@ -31,11 +30,6 @@ public class UserAccount extends BaseEntity {
     @Getter
     private String username;
 
-    @NotNull
-    @Size(min = 6)
-    @Getter
-    private String password;
-
     @ElementCollection
     private Set<String> roles;
 
@@ -43,4 +37,12 @@ public class UserAccount extends BaseEntity {
     @Column(unique = true)
     @Getter
     private String currentAccessToken;
+
+    @Getter
+    private boolean registrationConfirmed;
+
+    UserAccount confirmRegistration() {
+        registrationConfirmed = true;
+        return this;
+    }
 }
