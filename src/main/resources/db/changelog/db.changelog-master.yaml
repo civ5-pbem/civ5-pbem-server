@@ -8,8 +8,6 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-              primary-key: true
-              unique: true
             name: ID
             type: VARCHAR(255)
         - column:
@@ -21,19 +19,16 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-              unique: true
             name: VERSION
             type: BIGINT(19)
         - column:
             constraints:
               nullable: false
-              unique: true
             name: CURRENT_ACCESS_TOKEN
             type: VARCHAR(255)
         - column:
             constraints:
               nullable: false
-              unique: true
             name: EMAIL
             type: VARCHAR(255)
         - column:
@@ -47,6 +42,18 @@ databaseChangeLog:
             name: USERNAME
             type: VARCHAR(255)
         tableName: USER_ACCOUNT
+    - addPrimaryKey:
+        tableName: USER_ACCOUNT
+        columnNames: ID
+        constraintName: PK_USER_ACCOUNT_ID
+    - addUniqueConstraint:
+        tableName: USER_ACCOUNT
+        columnNames: CURRENT_ACCESS_TOKEN
+        constraintName: UK_USER_ACCOUNT_CURRENT_ACCESS_TOKEN
+    - addUniqueConstraint:
+        tableName: USER_ACCOUNT
+        columnNames: EMAIL
+        constraintName: UK_USER_ACCOUNT_EMAIL
 - changeSet:
     id: 1513510734208-2
     author: michal@cybulski.me
