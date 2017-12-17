@@ -86,3 +86,23 @@ databaseChangeLog:
         onUpdate: RESTRICT
         referencedColumnNames: ID
         referencedTableName: USER_ACCOUNT
+- changeSet:
+    id: 1513552416000-9
+    author: michal@cybulski.me
+    changes:
+    - addColumn:
+        tableName: USER_ACCOUNT
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: TMP_VERSION
+            type: BIGINT(19)
+            valueComputed: VERSION
+    - dropColumn:
+        tableName: USER_ACCOUNT
+        columnName: VERSION
+    - renameColumn:
+        tableName: USER_ACCOUNT
+        oldColumnName: TMP_VERSION
+        newColumnName: VERSION
