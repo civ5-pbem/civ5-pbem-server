@@ -3,16 +3,18 @@ spring:
     active:
   datasource:
     driver-class-name: org.h2.Driver
-    url: "jdbc:h2:./database;DB_CLOSE_ON_EXIT=FALSE"
+    url: "jdbc:h2:${civ5.data-dir}/db;DB_CLOSE_ON_EXIT=FALSE"
     username: "civ5"
     password: "civ5"
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
   mail:
-    host:
-    username:
-    password:
+    host: # configure me
+    username: # configure me
+    password: # configure me
 
 civ5:
-  mail.from:
+  mail.from: # configure me
+  data-dir: ./data
+  saves-dir: ./data/saves

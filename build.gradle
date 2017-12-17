@@ -9,7 +9,13 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('com.h2database:h2:1.4.196')
+        classpath('org.yaml:snakeyaml:1.19')
     }
+}
+
+plugins {
+    id 'org.liquibase.gradle' version '1.2.4'
 }
 
 apply plugin: 'java'
@@ -34,8 +40,22 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.projectlombok:lombok:1.16.18')
+    compile('org.projectlombok:lombok')
+    compile('org.liquibase:liquibase-core')
     runtime('com.h2database:h2')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.security:spring-security-test')
+}
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
+            url 'jdbc:h2:./data/db;FILE_LOCK=NO'
+            username 'civ5'
+            password 'civ5'
+        }
+    }
+
+    runList = 'main'
 }

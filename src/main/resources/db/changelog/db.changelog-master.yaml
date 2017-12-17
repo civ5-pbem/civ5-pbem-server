@@ -1,0 +1,88 @@
+databaseChangeLog:
+- changeSet:
+    id: 1513510734208-1
+    author: michal@cybulski.me
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primary-key: true
+              unique: true
+            name: ID
+            type: VARCHAR(255)
+        - column:
+            name: CREATED_AT
+            type: TIMESTAMP
+        - column:
+            name: UPDATED_AT
+            type: TIMESTAMP
+        - column:
+            constraints:
+              nullable: false
+              unique: true
+            name: VERSION
+            type: BIGINT(19)
+        - column:
+            constraints:
+              nullable: false
+              unique: true
+            name: CURRENT_ACCESS_TOKEN
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              unique: true
+            name: EMAIL
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: REGISTRATION_CONFIRMED
+            type: BOOLEAN(1)
+        - column:
+            constraints:
+              nullable: false
+            name: USERNAME
+            type: VARCHAR(255)
+        tableName: USER_ACCOUNT
+- changeSet:
+    id: 1513510734208-2
+    author: michal@cybulski.me
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: USER_ACCOUNT_ID
+            type: VARCHAR(255)
+        - column:
+            name: ROLES
+            type: VARCHAR(255)
+        tableName: USER_ACCOUNT_ROLES
+- changeSet:
+    id: 1513510734208-7
+    author: michal@cybulski.me
+    changes:
+    - createIndex:
+        columns:
+        - column:
+            name: USER_ACCOUNT_ID
+        indexName: IDX_USER_ACCOUNT_ROLES_USER_ACCOUNT_ID
+        tableName: USER_ACCOUNT_ROLES
+- changeSet:
+    id: 1513510734208-8
+    author: michal@cybulski.me
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: USER_ACCOUNT_ID
+        baseTableName: USER_ACCOUNT_ROLES
+        constraintName: FK_USER_ACCOUNT_ROLES_USER_ACCOUNT_ID
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: RESTRICT
+        onUpdate: RESTRICT
+        referencedColumnNames: ID
+        referencedTableName: USER_ACCOUNT
