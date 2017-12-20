@@ -13,10 +13,10 @@ import java.util.UUID;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserAccountFactory {
 
-    UserAccount createUserAccount(String email) {
+    UserAccount createUserAccount(String email, String username) {
         return UserAccount.builder()
                        .email(email)
-                       .username(email)
+                       .username(username)
                        .currentAccessToken(UUID.randomUUID().toString())
                        .build();
     }

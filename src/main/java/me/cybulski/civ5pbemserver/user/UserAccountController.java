@@ -28,10 +28,12 @@ class UserAccountController {
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = "application/json")
     public RegisterOutputDTO register(@RequestBody @Validated RegisterInputDTO registerInputDTO) {
         UserAccount newUserAccount = userAccountApplicationService.registerUserAccount(
-                registerInputDTO.getEmail());
+                registerInputDTO.getEmail(),
+                registerInputDTO.getUsername());
 
         return RegisterOutputDTO.builder()
                        .email(newUserAccount.getEmail())
+                       .username(newUserAccount.getUsername())
                        .build();
     }
 
@@ -41,7 +43,6 @@ class UserAccountController {
 
         return CurrentUserOutputDTO.builder()
                        .email(authentication.getName())
-                       .username(authentication.getName())
                        .roles(authentication.getAuthorities().stream()
                                       .map(Object::toString)
                                       .collect(Collectors.toSet()))

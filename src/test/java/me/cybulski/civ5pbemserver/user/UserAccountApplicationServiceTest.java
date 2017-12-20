@@ -30,9 +30,10 @@ public class UserAccountApplicationServiceTest extends IntegrationTest {
     public void registerUserAccountWorks() throws Exception {
         // given
         String email = "michal@cybulski.me";
+        String username = "mcybulsk";
 
         // when
-        userAccountApplicationService.registerUserAccount(email);
+        userAccountApplicationService.registerUserAccount(email, username);
 
         // then
         Optional<UserAccount> newUserAccount = userAccountRepository.findByEmail(email);

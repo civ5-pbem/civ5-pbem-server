@@ -17,4 +17,7 @@ public class RegisterInputDTO {
     @NotNull
     @Email
     private String email;
+
+    @NotNull
+    private String username;
 }

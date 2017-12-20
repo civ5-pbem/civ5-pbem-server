@@ -40,6 +40,6 @@ class DefaultUserDetailsService implements UserDetailsService {
         ArrayList<SimpleGrantedAuthority> roles = new ArrayList<>();
         roles.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-        return new User(userAccount.getUsername(), userAccount.getCurrentAccessToken(), roles);
+        return new User(userAccount.getEmail(), userAccount.getCurrentAccessToken(), roles);
     }
 }

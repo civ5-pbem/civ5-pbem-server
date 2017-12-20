@@ -19,8 +19,8 @@ public class UserAccountApplicationService {
     private final UserAccountRepository userAccountRepository;
     private final MailService mailService;
 
-    public UserAccount registerUserAccount(@NonNull String email) {
-        UserAccount newUserAccount = userAccountRepository.save(userAccountFactory.createUserAccount(email));
+    public UserAccount registerUserAccount(@NonNull String email, String username) {
+        UserAccount newUserAccount = userAccountRepository.save(userAccountFactory.createUserAccount(email, username));
         mailService.sendRegistrationConfirmationEmail(newUserAccount.getEmail(), newUserAccount.getCurrentAccessToken());
 
         return newUserAccount;

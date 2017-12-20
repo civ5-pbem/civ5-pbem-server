@@ -13,6 +13,5 @@ import java.util.Set;
 @Getter
 public class CurrentUserOutputDTO {
     private String email;
-    private String username;
     private Set<String> roles;
 }

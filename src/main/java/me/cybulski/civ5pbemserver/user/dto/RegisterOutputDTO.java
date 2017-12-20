@@ -11,4 +11,5 @@ import lombok.*;
 @Getter
 public class RegisterOutputDTO {
     private String email;
+    private String username;
 }

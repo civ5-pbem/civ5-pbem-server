@@ -22,8 +22,10 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
     public void whenUserRegisters_thenNewUserAccountIsCreated() throws Exception {
         // given
         String email = "michal@cybulski.me";
+        String username = "mcybulsk";
         RegisterInputDTO data = RegisterInputDTO.builder()
                 .email(email)
+                .username(username)
                 .build();
 
         // when
@@ -32,7 +34,8 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
         // then
         resultAction
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.email").value(email));
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.username").value(username));
     }
 
     @Test
@@ -44,7 +47,6 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
         resultActions
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.email").value("anonymousUser"))
-                .andExpect(jsonPath("$.username").value("anonymousUser"))
                 .andExpect(jsonPath("$.roles.length()").value(1))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_ANONYMOUS"));
     }
@@ -53,9 +55,10 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
     public void whenRegisteredUserVisitsCurrent_thenUserIsReturned() throws Exception {
         // given
         String email = "michal@cybulski.me";
+        String username = "mcybulsk";
 
         // and
-        userAccountApplicationService.registerUserAccount(email);
+        userAccountApplicationService.registerUserAccount(email, username);
         UserAccount userAccount = userAccountApplicationService.findUserByEmail(email).get();
 
         // when
@@ -66,7 +69,6 @@ public class UserAccountControllerTest extends WebMvcIntegrationTest {
         resultActions
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.username").value(email))
                 .andExpect(jsonPath("$.roles.length()").value(1))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }
