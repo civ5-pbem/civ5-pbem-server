@@ -91,6 +91,34 @@ public class GameApplicationService {
         return convertToDTO(game);
     }
 
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO kickPlayer(String gameId, String playerId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        if (!game.getHost().equals(currentUser)) {
+            throw new NoPermissionToModifyGameException("Cannot kick player - no permission!");
+        }
+        // FIXME #8
+        // FIXME #9
+        game.kickPlayer(playerId);
+
+        return convertToDTO(game);
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO leaveGame(String gameId) {
+        // FIXME #9
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        game.leave(currentUser);
+
+        return convertToDTO(game);
+    }
+
     private boolean checkCanModifyPlayer(Game game, String playerId, UserAccount userAccount) {
         Player foundPlayer = game.getPlayers().stream()
                 .filter(player -> player.getId().equals(playerId))

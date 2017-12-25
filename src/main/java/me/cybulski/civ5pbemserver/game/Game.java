@@ -132,4 +132,12 @@ class Game extends BaseEntity {
                 .filter(player -> PlayerType.HUMAN.equals(player.getPlayerType()))
                 .noneMatch(player -> player.getHumanUserAccount() == null);
     }
+
+    public void kickPlayer(String playerId) {
+        findPlayer(playerId).kick();
+    }
+
+    public void leave(UserAccount currentUser) {
+        findPlayer(currentUser).orElseThrow(ResourceNotFoundException::new).leave();
+    }
 }

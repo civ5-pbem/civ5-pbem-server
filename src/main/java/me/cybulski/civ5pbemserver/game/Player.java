@@ -63,4 +63,12 @@ class Player extends BaseEntity {
     void chooseCivilization(Civilization civilization) {
         this.civilization = civilization;
     }
+
+    public void kick() {
+        this.humanUserAccount = null;
+    }
+
+    public void leave() {
+        this.humanUserAccount = null;
+    }
 }

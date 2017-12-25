@@ -186,6 +186,66 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     }
 
     @Test
+    public void whenHostKicksPlayerOut_thenTheGameIsReturned() throws Exception {
+        // given
+        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
+        testEntityManager.persistAndFlush(userAccount);
+
+        // and
+        mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
+                                                                  "/players/71f73c36-e4af-4a1d-8f56-7874f542a905/kick"),
+                                              getTestUserAccount()));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
+                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+    }
+
+    @Test
+    public void whenRandomUserKicksPlayerOut_thenErrorIsReturned() throws Exception {
+        // given
+        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
+        testEntityManager.persistAndFlush(userAccount);
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
+                                                                  "/players/e786803e-b6c9-4910-9122-4194734e73a7/kick"),
+                                              userAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void whenUserLeaves_thenTheGameIsReturned() throws Exception {
+        // given
+        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
+        testEntityManager.persistAndFlush(userAccount);
+
+        // and
+        mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/leave"),
+                                              userAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
+                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+    }
+
+    @Test
     public void whenUnauthenticated_thenExceptionIsReturned() throws Exception {
         // given
         NewGameInputDTO newGameInputDTO = prepareNewGameInputDTO();
