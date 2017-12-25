@@ -1,7 +1,9 @@
 package me.cybulski.civ5pbemserver.game;
 
 import lombok.*;
+import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.exception.CannotJoinGameException;
+import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;
 import me.cybulski.civ5pbemserver.game.exception.CannotStartGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
@@ -13,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,6 +62,7 @@ class Game extends BaseEntity {
     }
 
     void joinGame(UserAccount userAccount) {
+        // FIXME #9
         if (getPlayerList().stream()
                 .map(Player::getHumanUserAccount)
                 .anyMatch(userAccount::equals)) {
@@ -74,13 +78,53 @@ class Game extends BaseEntity {
         firstEmptyPlayer.joinHuman(userAccount);
     }
 
+    void changePlayerType(String playerId, PlayerType playerType) {
+        // FIXME #9
+        Player foundPlayer = findPlayer(playerId);
+
+        switch (playerType) {
+            case HUMAN:
+                foundPlayer.changeToHuman();
+                break;
+            case AI:
+                foundPlayer.changeToAi();
+                break;
+            case CLOSED:
+                foundPlayer.close();
+                break;
+        }
+    }
+
+    private Player findPlayer(String playerId) {
+        return getPlayers().stream()
+                .filter(player -> player.getId().equals(playerId))
+                .findFirst()
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    Optional<Player> findPlayer(UserAccount userAccount) {
+        return getPlayers().stream()
+                .filter(player -> userAccount.equals(player.getHumanUserAccount()))
+                .findAny();
+    }
+
     void startGame() {
+        // FIXME #9
         if (!checkAllHumanPlayersJoined()) {
             throw new CannotStartGameException("Not all human players joined!");
         }
 
-        // FIXME send email to host?
+        // FIXME #8 send email to host?
         this.gameState = GameState.WAITING_FOR_FIRST_MOVE;
+    }
+
+    void chooseCivilization(String playerId, Civilization civilization) {
+        // FIXME #9
+        if (!GameState.WAITING_FOR_PLAYERS.equals(gameState)) {
+            throw new CannotModifyGameException("Civilizations can only be changed before start!");
+        }
+        Player player = findPlayer(playerId);
+        player.chooseCivilization(civilization);
     }
 
     private boolean checkAllHumanPlayersJoined() {

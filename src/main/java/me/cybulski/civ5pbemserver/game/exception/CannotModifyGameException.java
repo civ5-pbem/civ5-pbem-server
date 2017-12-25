@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Michał Cybulski
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class CannotStartGameException extends RuntimeException {
+public class CannotModifyGameException extends RuntimeException {
 
-    public CannotStartGameException(String message) {
+    public CannotModifyGameException(String message) {
         super(message);
     }
 }

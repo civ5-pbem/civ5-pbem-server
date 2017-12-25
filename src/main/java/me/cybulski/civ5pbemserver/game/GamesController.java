@@ -2,6 +2,8 @@ package me.cybulski.civ5pbemserver.game;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
+import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +34,20 @@ public class GamesController {
     @RequestMapping(path = "{gameId}", method = RequestMethod.GET)
     public GameOutputDTO findGameById(@PathVariable String gameId) {
         return gameApplicationService.findGameById(gameId);
+    }
+
+    @RequestMapping(path = "{gameId}/players/{playerId}/change-player-type")
+    public GameOutputDTO changePlayerType(@PathVariable String gameId,
+                                          @PathVariable String playerId,
+                                          @Validated @RequestBody ChangePlayerTypeInputDTO changePlayerTypeInputDTO) {
+        return gameApplicationService.changePlayerType(gameId, playerId, changePlayerTypeInputDTO);
+    }
+
+    @RequestMapping(path = "{gameId}/players/{playerId}/choose-civilization")
+    public GameOutputDTO chooseCivilization(@PathVariable String gameId,
+                                            @PathVariable String playerId,
+                                            @Validated @RequestBody ChooseCivilizationInputDTO chooseCivilizationInputDTO) {
+        return gameApplicationService.chooseCivilization(gameId, playerId, chooseCivilizationInputDTO);
     }
 
     @RequestMapping(path = "{gameId}/join", method = RequestMethod.POST)
