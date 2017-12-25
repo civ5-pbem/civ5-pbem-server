@@ -1,5 +1,6 @@
 package me.cybulski.civ5pbemserver;
 
+import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
@@ -23,4 +24,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     protected TestEntityManager testEntityManager;
+
+    @After
+    public void flushDb() {
+        testEntityManager.flush();
+    }
 }
