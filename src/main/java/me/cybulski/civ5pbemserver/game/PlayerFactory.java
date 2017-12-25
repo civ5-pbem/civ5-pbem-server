@@ -12,16 +12,16 @@ import java.util.Set;
 @Component
 class PlayerFactory {
 
-    public Set<Player> createNewPlayers(UserAccount host, Game game, int playerCount) {
+    public Set<Player> createNewPlayers(UserAccount host, Game game, Integer playerCount) {
         Set<Player> result = new HashSet<>();
 
         for (int i = 0; i < playerCount; i++) {
             result.add(Player.builder()
+                               .game(game)
                                .civilization(Civilization.RANDOM)
                                .playerNumber(i + 1)
                                .humanUserAccount(i == 0 ? host : null)
                                .playerType(PlayerType.HUMAN)
-                               .game(game)
                                .build());
         }
 

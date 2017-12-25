@@ -6,6 +6,7 @@ import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.PlayerOutputDTO;
+import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +24,16 @@ import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class GameApplicationService {
 
+    private final UserAccountApplicationService userAccountApplicationService;
     private final GameFactory gameFactory;
     private final GameRepository gameRepository;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO createNewGame(NewGameInputDTO newGameInputDTO) {
-        Game newGame = gameFactory.createNewGame(newGameInputDTO);
+        Game newGame = gameFactory.createNewGame(
+                userAccountApplicationService.getCurrentUserAccount().orElseThrow(RuntimeException::new),
+                newGameInputDTO);
         gameRepository.save(newGame);
 
         return convertToDTO(newGame);
@@ -56,7 +60,6 @@ public class GameApplicationService {
                 .gameState(game.getGameState())
                 .host(game.getHost().getUsername())
                 .mapSize(game.getMapSize())
-                .maxNumberOfPlayers(game.getMaxNumberOfPlayers())
                 .numberOfCityStates(game.getNumberOfCityStates())
                 .players(game.getPlayers()
                                  .stream()

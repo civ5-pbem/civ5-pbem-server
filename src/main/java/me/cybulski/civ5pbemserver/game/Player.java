@@ -34,4 +34,24 @@ class Player extends BaseEntity {
 
     @ManyToOne
     private UserAccount humanUserAccount;
+
+    void changeToHuman() {
+        // FIXME test me
+        this.playerType = PlayerType.HUMAN;
+    }
+
+    void changeToAi() {
+        // FIXME test me
+        this.playerType = PlayerType.AI;
+    }
+
+    void close() {
+        // FIXME test me
+        this.playerType = PlayerType.CLOSED;
+    }
+
+    void joinHuman(UserAccount newPlayer) {
+        // FIXME add HUMAN type check
+        this.humanUserAccount = newPlayer;
+    }
 }

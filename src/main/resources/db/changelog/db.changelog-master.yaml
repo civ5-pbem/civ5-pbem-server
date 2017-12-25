@@ -391,3 +391,10 @@ databaseChangeLog:
         - column:
             name: HUMAN_USER_ACCOUNT_ID
             value: null
+- changeSet:
+    id: 1514214741000-14
+    author: michal@cybulski.me
+    changes:
+    - dropColumn:
+        tableName: GAME
+        columnName: MAX_NUMBER_OF_PLAYERS
