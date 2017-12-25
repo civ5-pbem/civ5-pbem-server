@@ -2,6 +2,7 @@ package me.cybulski.civ5pbemserver.game;
 
 import me.cybulski.civ5pbemserver.WebMvcIntegrationTest;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
+import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.junit.Test;
 import org.springframework.test.web.servlet.ResultActions;
@@ -13,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Michał Cybulski
  */
 public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
+
+    private final TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
 
     private final String gameName = "New Game!";
     private final String gameDescription = "Some description!";
@@ -62,6 +65,22 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // when
         ResultActions resultActions =
                 mockMvc.perform(authenticated(prepareGet("/games/09d50664-e171-45c6-a04c-d650caa4dc3f"), getTestUserAccount()));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"));
+    }
+
+    @Test
+    public void whenUserJoinsGame_thenTheGameIsReturned() throws Exception {
+        // given
+        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
+        testEntityManager.persistAndFlush(userAccount);
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
 
         // then
         resultActions

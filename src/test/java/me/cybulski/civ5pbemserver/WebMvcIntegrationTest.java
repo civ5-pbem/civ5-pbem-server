@@ -35,6 +35,11 @@ public abstract class WebMvcIntegrationTest extends IntegrationTest{
                        .contentType(APPLICATION_JSON);
     }
 
+    protected MockHttpServletRequestBuilder preparePost(String url) {
+        return MockMvcRequestBuilders
+                .post(URI.create(url));
+    }
+
     protected MockHttpServletRequestBuilder preparePost(String url, Object data) throws JsonProcessingException {
         return MockMvcRequestBuilders
                        .post(URI.create(url))
