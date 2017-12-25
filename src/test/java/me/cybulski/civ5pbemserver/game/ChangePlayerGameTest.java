@@ -48,6 +48,20 @@ public class ChangePlayerGameTest extends BaseGameTest {
     }
 
     @Test
+    public void whenAiPlayerTypeIsChangedToHuman_thenChangeHappens() {
+        // given
+        Player player = subject.getPlayerList().get(1);
+        Assert.state(PlayerType.HUMAN.equals(player.getPlayerType()), "Default players should be human");
+        player.changeToAi();
+
+        // when
+        subject.changePlayerType(player.getId(), PlayerType.HUMAN);
+
+        // then
+        assertThat(player.getPlayerType()).isEqualTo(PlayerType.HUMAN);
+    }
+
+    @Test
     public void whenOccupiedHumanPlayerTypeIsChangedToAi_thenExceptionIsThrown() {
         // given
         Player player = subject.getPlayerList().get(0);
