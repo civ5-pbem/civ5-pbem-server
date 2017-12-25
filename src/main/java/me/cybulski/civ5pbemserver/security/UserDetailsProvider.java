@@ -1,15 +1,13 @@
 package me.cybulski.civ5pbemserver.security;
 
-import me.cybulski.civ5pbemserver.user.UserAccount;
-import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import me.cybulski.civ5pbemserver.user.UserAccount;
+import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,16 +19,9 @@ import java.util.ArrayList;
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Transactional(readOnly = true)
-class DefaultUserDetailsService implements UserDetailsService {
+class UserDetailsProvider {
 
     private final UserAccountApplicationService userAccountApplicationService;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userAccountApplicationService.findUserByEmail(username)
-                       .map(this::convertToUser)
-                       .orElseThrow(() -> new UsernameNotFoundException("Cannot find user with username " + username));
-    }
 
     public UserDetails loadUserByAccessToken(String accessToken) {
         return userAccountApplicationService.findUserByToken(accessToken)

@@ -18,7 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final DefaultUserDetailsService defaultUserDetailsService;
+    private final UserDetailsProvider userDetailsProvider;
     private final DefaultAuthenticationProvider defaultAuthenticationProvider;
 
     @Override
@@ -37,12 +37,11 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(defaultAuthenticationProvider);
-        auth.userDetailsService(defaultUserDetailsService);
     }
 
     @Bean
     public TokenAuthenticationFilterBean tokenAuthenticationFilterBean() throws Exception {
-        TokenAuthenticationFilterBean tokenAuthenticationFilterBean = new TokenAuthenticationFilterBean(defaultUserDetailsService);
+        TokenAuthenticationFilterBean tokenAuthenticationFilterBean = new TokenAuthenticationFilterBean(userDetailsProvider);
         tokenAuthenticationFilterBean.setAuthenticationManager(authenticationManagerBean());
 
         return tokenAuthenticationFilterBean;

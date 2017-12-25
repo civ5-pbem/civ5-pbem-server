@@ -15,10 +15,10 @@ class TokenAuthenticationFilterBean extends AbstractPreAuthenticatedProcessingFi
 
     private static final String ACCESS_TOKEN_HEADER = "Access-Token";
 
-    private final DefaultUserDetailsService defaultUserDetailsService;
+    private final UserDetailsProvider userDetailsProvider;
 
     private UserDetails getUserDetails(String accessToken) {
-        return defaultUserDetailsService.loadUserByAccessToken(accessToken);
+        return userDetailsProvider.loadUserByAccessToken(accessToken);
     }
 
     private String getCredentials(HttpServletRequest httpRequest) {
