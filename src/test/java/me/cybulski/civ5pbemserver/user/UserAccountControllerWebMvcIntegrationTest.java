@@ -76,11 +76,8 @@ public class UserAccountControllerWebMvcIntegrationTest extends WebMvcIntegratio
     @Test
     public void whenTestUserVisitsCurrent_thenTestUserIsReturned() throws Exception {
         // given
-        String email = "test@email.com";
-
-        // and
-        UserAccount userAccount = userAccountApplicationService.findUserByEmail(email)
-                                          .orElseThrow(RuntimeException::new);
+        UserAccount userAccount = new TestUserAccountFactory().createNewUserAccount("host@test.com", "hostUser");
+        testEntityManager.persistAndFlush(userAccount);
 
         // when
         ResultActions resultActions =
@@ -89,7 +86,8 @@ public class UserAccountControllerWebMvcIntegrationTest extends WebMvcIntegratio
         // then
         resultActions
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.email").value(userAccount.getEmail()))
+                .andExpect(jsonPath("$.username").value(userAccount.getUsername()))
                 .andExpect(jsonPath("$.roles.length()").value(1))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }

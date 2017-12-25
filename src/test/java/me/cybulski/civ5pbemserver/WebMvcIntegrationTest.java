@@ -51,8 +51,4 @@ public abstract class WebMvcIntegrationTest extends IntegrationTest{
                                                           UserAccount userAccount) {
         return builder.header("Access-Token", userAccount.getCurrentAccessToken());
     }
-
-    protected UserAccount getTestUserAccount() {
-        return userAccountApplicationService.findUserByEmail("test@email.com").orElseThrow(RuntimeException::new);
-    }
 }

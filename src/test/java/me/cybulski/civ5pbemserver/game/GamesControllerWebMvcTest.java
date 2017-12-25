@@ -6,6 +6,7 @@ import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -18,231 +19,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
     private final TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
+    private Game game;
+    private UserAccount hostUserAccount;
+    private UserAccount secondUserAccount;
+    private MapSize mapSize;
 
-    private final String gameName = "New Game!";
-    private final String gameDescription = "Some description!";
-    private final MapSize mapSize = MapSize.STANDARD;
+    @Before
+    public void setUp() {
+        // setting up the users
+        hostUserAccount = testUserAccountFactory.createNewUserAccount("host@test.com", "hostUser");
+        secondUserAccount = testUserAccountFactory.createNewUserAccount("second@test.com", "secondUser");
+        testEntityManager.persistAndFlush(hostUserAccount);
+        testEntityManager.persistAndFlush(secondUserAccount);
+
+        // setting up the game
+        mapSize = MapSize.DUEL;
+        game = new TestGameFactory().createNewTestGame(hostUserAccount, mapSize);
+        testEntityManager.persistAndFlush(game);
+    }
 
     @Test
     public void whenUserCreatesNewGame_thenGameIsReturned() throws Exception {
         // given
         NewGameInputDTO newGameInputDTO = prepareNewGameInputDTO();
 
-        // and
-        UserAccount testUserAccount = getTestUserAccount();
-
         // when
         ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/new-game", newGameInputDTO), testUserAccount));
+                mockMvc.perform(authenticated(preparePost("/games/new-game", newGameInputDTO), hostUserAccount));
 
         // then
         resultActions
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.host").value(testUserAccount.getUsername()))
+                .andExpect(jsonPath("$.host").value(hostUserAccount.getUsername()))
                 .andExpect(jsonPath("$.players").exists())
-                .andExpect(jsonPath("$.name").value(gameName))
-                .andExpect(jsonPath("$.description").value(gameDescription))
+                .andExpect(jsonPath("$.name").value(game.getName()))
+                .andExpect(jsonPath("$.description").value(game.getDescription()))
                 .andExpect(jsonPath("$.gameState").value(GameState.WAITING_FOR_PLAYERS.toString()))
-                .andExpect(jsonPath("$.host").value(testUserAccount.getUsername()))
+                .andExpect(jsonPath("$.host").value(hostUserAccount.getUsername()))
                 .andExpect(jsonPath("$.numberOfCityStates").value(mapSize.getDefaultNumberOfCityStates()))
                 .andExpect(jsonPath("$.mapSize").value(mapSize.toString()));
-    }
-
-    @Test
-    public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(prepareGet("/games/"), getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$.[0].id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"));
-    }
-
-    @Test
-    public void whenFindGameByIdIsInvoked_thenTheGameIsReturned() throws Exception {
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(prepareGet("/games/09d50664-e171-45c6-a04c-d650caa4dc3f"), getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"));
-    }
-
-    @Test
-    public void whenUserJoinsGame_thenTheGameIsReturned() throws Exception {
-        // given
-        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
-        testEntityManager.persistAndFlush(userAccount);
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[1].humanUserAccount").value(userAccount.getUsername()));
-    }
-
-    @Test
-    public void whenHostChangesHostsCivilization_thenTheGameIsReturned() throws Exception {
-        // given
-        Civilization civilization = Civilization.BABYLONIAN;
-        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
-                .builder()
-                .civilization(civilization)
-                .build();
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/e786803e-b6c9-4910-9122-4194734e73a7" +
-                                                                  "/choose-civilization",
-                                                          chooseCivilizationInputDTO),
-                                              getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[0].civilization").value(civilization.toString()));
-    }
-
-    @Test
-    public void whenHostChangesAnotherHumanCivilization_thenErrorIsReturned() throws Exception {
-        // given
-        Civilization civilization = Civilization.BABYLONIAN;
-        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
-                .builder()
-                .civilization(civilization)
-                .build();
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/71f73c36-e4af-4a1d-8f56-7874f542a905" +
-                                                                  "/choose-civilization",
-                                                          chooseCivilizationInputDTO),
-                                              getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(403));
-    }
-
-    @Test
-    public void whenHostChangesAiCivilization_thenTheGameIsReturned() throws Exception {
-        // given
-        Civilization civilization = Civilization.BABYLONIAN;
-        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
-                .builder()
-                .civilization(civilization)
-                .build();
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/6594c177-f39a-457e-adc7-c0300d937b4f" +
-                                                                  "/choose-civilization",
-                                                          chooseCivilizationInputDTO),
-                                              getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[2].civilization").value(civilization.toString()));
-    }
-
-    @Test
-    public void whenHostChangesPlayerType_thenPlayerTypeIsChanged() throws Exception {
-        // given
-        PlayerType playerType = PlayerType.CLOSED;
-        ChangePlayerTypeInputDTO changePlayerTypeInputDTO = ChangePlayerTypeInputDTO
-                .builder()
-                .playerType(playerType)
-                .build();
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/71f73c36-e4af-4a1d-8f56-7874f542a905" +
-                                                                  "/change-player-type",
-                                                          changePlayerTypeInputDTO),
-                                              getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[1].playerType").value(playerType.toString()));
-    }
-
-    @Test
-    public void whenHostKicksPlayerOut_thenTheGameIsReturned() throws Exception {
-        // given
-        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
-        testEntityManager.persistAndFlush(userAccount);
-
-        // and
-        mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/71f73c36-e4af-4a1d-8f56-7874f542a905/kick"),
-                                              getTestUserAccount()));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
-    }
-
-    @Test
-    public void whenRandomUserKicksPlayerOut_thenErrorIsReturned() throws Exception {
-        // given
-        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
-        testEntityManager.persistAndFlush(userAccount);
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f" +
-                                                                  "/players/e786803e-b6c9-4910-9122-4194734e73a7/kick"),
-                                              userAccount));
-
-        // then
-        resultActions
-                .andExpect(status().is(403));
-    }
-
-    @Test
-    public void whenUserLeaves_thenTheGameIsReturned() throws Exception {
-        // given
-        UserAccount userAccount = testUserAccountFactory.createNewUserAccount("testuser@test.com", "testUser");
-        testEntityManager.persistAndFlush(userAccount);
-
-        // and
-        mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/join"), userAccount));
-
-        // when
-        ResultActions resultActions =
-                mockMvc.perform(authenticated(preparePost("/games/09d50664-e171-45c6-a04c-d650caa4dc3f/leave"),
-                                              userAccount));
-
-        // then
-        resultActions
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"))
-                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
     }
 
     @Test
@@ -259,9 +75,193 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
     private NewGameInputDTO prepareNewGameInputDTO() {
         return NewGameInputDTO.builder()
-                .gameName(gameName)
-                .gameDescription(gameDescription)
+                .gameName(game.getName())
+                .gameDescription(game.getDescription())
                 .mapSize(mapSize)
                 .build();
+    }
+
+    @Test
+    public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/games/"), hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$.[0].id").value(game.getId()));
+    }
+
+    @Test
+    public void whenFindGameByIdIsInvoked_thenTheGameIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/games/" + game.getId()), hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()));
+    }
+
+    @Test
+    public void whenUserJoinsGame_thenTheGameIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[1].humanUserAccount").value(secondUserAccount.getUsername()));
+    }
+
+    @Test
+    public void whenHostChangesHostsCivilization_thenTheGameIsReturned() throws Exception {
+        // given
+        Civilization civilization = Civilization.BABYLONIAN;
+        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
+                .builder()
+                .civilization(civilization)
+                .build();
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(0).getId() +
+                                                                  "/choose-civilization",
+                                                          chooseCivilizationInputDTO),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[0].civilization").value(civilization.toString()));
+    }
+
+    @Test
+    public void whenHostChangesAnotherHumanCivilization_thenErrorIsReturned() throws Exception {
+        // given
+        Civilization civilization = Civilization.BABYLONIAN;
+        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
+                .builder()
+                .civilization(civilization)
+                .build();
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(1).getId() +
+                                                                  "/choose-civilization",
+                                                          chooseCivilizationInputDTO),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void whenHostChangesAiCivilization_thenTheGameIsReturned() throws Exception {
+        // given
+        Civilization civilization = Civilization.BABYLONIAN;
+        ChooseCivilizationInputDTO chooseCivilizationInputDTO = ChooseCivilizationInputDTO
+                .builder()
+                .civilization(civilization)
+                .build();
+
+        // and
+        game.getPlayerList().get(1).changeToAi();
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(1).getId() +
+                                                                  "/choose-civilization",
+                                                          chooseCivilizationInputDTO),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[1].civilization").value(civilization.toString()));
+    }
+
+    @Test
+    public void whenHostChangesPlayerType_thenPlayerTypeIsChanged() throws Exception {
+        // given
+        PlayerType playerType = PlayerType.CLOSED;
+        ChangePlayerTypeInputDTO changePlayerTypeInputDTO = ChangePlayerTypeInputDTO
+                .builder()
+                .playerType(playerType)
+                .build();
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(1).getId() +
+                                                                  "/change-player-type",
+                                                          changePlayerTypeInputDTO),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[1].playerType").value(playerType.toString()));
+    }
+
+    @Test
+    public void whenHostKicksPlayerOut_thenTheGameIsReturned() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), hostUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(1).getId() + "/kick"),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+    }
+
+    @Test
+    public void whenRandomUserKicksPlayerOut_thenErrorIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() +
+                                                                  "/players/" + game.getPlayerList().get(0).getId() + "/kick"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void whenUserLeaves_thenTheGameIsReturned() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/leave"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
     }
 }

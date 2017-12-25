@@ -433,3 +433,26 @@ databaseChangeLog:
         - column:
             name: HUMAN_USER_ACCOUNT_ID
             value: null
+- changeSet:
+    id: 1514235818000-15
+    author: michal@cybulski.me
+    context: test
+    changes:
+    - delete:
+        tableName: PLAYER
+        where: "ID = '6594c177-f39a-457e-adc7-c0300d937b4f'"
+    - delete:
+        tableName: PLAYER
+        where: "ID = '71f73c36-e4af-4a1d-8f56-7874f542a905'"
+    - delete:
+        tableName: PLAYER
+        where: "ID = 'e786803e-b6c9-4910-9122-4194734e73a7'"
+    - delete:
+        tableName: GAME
+        where: "ID = '09d50664-e171-45c6-a04c-d650caa4dc3f'"
+    - delete:
+        tableName: USER_ACCOUNT_ROLES
+        where: "USER_ACCOUNT_ID = '3942c91c-c502-4be8-8b74-a8a651d531a5'"
+    - delete:
+        tableName: USER_ACCOUNT
+        where: "ID = '3942c91c-c502-4be8-8b74-a8a651d531a5'"
