@@ -46,6 +46,31 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     }
 
     @Test
+    public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/games/"), getTestUserAccount()));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$.[0].id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"));
+    }
+
+    @Test
+    public void whenFindGameByIdIsInvoked_thenTheGameIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(prepareGet("/games/09d50664-e171-45c6-a04c-d650caa4dc3f"), getTestUserAccount()));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value("09d50664-e171-45c6-a04c-d650caa4dc3f"));
+    }
+
+    @Test
     public void whenUnauthenticated_thenExceptionIsReturned() throws Exception {
         NewGameInputDTO newGameInputDTO = prepareNewGameInputDTO();
 

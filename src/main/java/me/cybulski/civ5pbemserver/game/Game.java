@@ -14,8 +14,6 @@ import java.util.Set;
 /**
  * @author Michał Cybulski
  */
-// FIXME add schema migration
-// FIXME add tests
 @Entity
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -52,4 +50,6 @@ class Game extends BaseEntity {
     @Min(0)
     @Max(58)
     private Integer numberOfCityStates;
+
+
 }
