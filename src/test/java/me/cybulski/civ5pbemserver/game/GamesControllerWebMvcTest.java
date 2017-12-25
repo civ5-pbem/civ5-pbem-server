@@ -14,17 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
+    private final String gameName = "New Game!";
+    private final String gameDescription = "Some description!";
+    private final MapSize mapSize = MapSize.STANDARD;
+
     @Test
     public void whenUserCreatesNewGame_thenGameIsReturned() throws Exception {
         // given
-        String gameName = "New Game!";
-        String gameDescription = "Some description!";
-        MapSize mapSize = MapSize.STANDARD;
-        NewGameInputDTO newGameInputDTO = NewGameInputDTO.builder()
-                                                  .gameName(gameName)
-                                                  .gameDescription(gameDescription)
-                                                  .mapSize(mapSize)
-                                                  .build();
+        NewGameInputDTO newGameInputDTO = prepareNewGameInputDTO();
 
         // and
         UserAccount testUserAccount = getTestUserAccount();
@@ -44,5 +41,24 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.host").value(testUserAccount.getUsername()))
                 .andExpect(jsonPath("$.numberOfCityStates").value(mapSize.getDefaultNumberOfCityStates()))
                 .andExpect(jsonPath("$.mapSize").value(mapSize.toString()));
+    }
+
+    @Test
+    public void whenUnauthenticated_thenExceptionIsReturned() throws Exception {
+        NewGameInputDTO newGameInputDTO = prepareNewGameInputDTO();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(preparePost("/games/new-game", newGameInputDTO));
+
+        // then
+        resultActions.andExpect(status().is(403));
+    }
+
+    private NewGameInputDTO prepareNewGameInputDTO() {
+        return NewGameInputDTO.builder()
+                .gameName(gameName)
+                .gameDescription(gameDescription)
+                .mapSize(mapSize)
+                .build();
     }
 }

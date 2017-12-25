@@ -6,6 +6,7 @@ import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.PlayerOutputDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 /**
  * @author Michał Cybulski
  */
+@Transactional(readOnly = true)
 @RestController
 @RequestMapping("games")
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -25,6 +27,7 @@ public class GamesController {
 
     private final GameApplicationService gameApplicationService;
 
+    @Transactional
     @PreAuthorize("hasRole('USER')")
     @RequestMapping(path = "new-game", method = RequestMethod.POST, consumes = "application/json")
     public GameOutputDTO createNewGame(@Validated @RequestBody NewGameInputDTO newGameInputDTO) {

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.user.dto.CurrentUserOutputDTO;
 import me.cybulski.civ5pbemserver.user.dto.RegisterInputDTO;
 import me.cybulski.civ5pbemserver.user.dto.RegisterOutputDTO;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author Michał Cybulski
  */
+@Transactional(readOnly = true)
 @RestController
 @RequestMapping("user-accounts")
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -25,6 +27,7 @@ class UserAccountController {
 
     private final UserAccountApplicationService userAccountApplicationService;
 
+    @Transactional
     @RequestMapping(path = "register", method = RequestMethod.POST, consumes = "application/json")
     public RegisterOutputDTO register(@RequestBody @Validated RegisterInputDTO registerInputDTO) {
         UserAccount newUserAccount = userAccountApplicationService.registerUserAccount(
