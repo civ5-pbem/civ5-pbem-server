@@ -391,3 +391,45 @@ databaseChangeLog:
         - column:
             name: HUMAN_USER_ACCOUNT_ID
             value: null
+- changeSet:
+    id: 1514214741000-14
+    author: michal@cybulski.me
+    changes:
+    - dropColumn:
+        tableName: GAME
+        columnName: MAX_NUMBER_OF_PLAYERS
+- changeSet:
+    id: 1514230646000-14
+    author: michal@cybulski.me
+    context: test
+    changes:
+    - insert:
+        tableName: PLAYER
+        columns:
+        - column:
+            name: ID
+            value: '6594c177-f39a-457e-adc7-c0300d937b4f'
+        - column:
+            name: CREATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: UPDATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: VERSION
+            value: 1
+        - column:
+            name: GAME_ID
+            value: '09d50664-e171-45c6-a04c-d650caa4dc3f'
+        - column:
+            name: PLAYER_NUMBER
+            valueNumeric: 3
+        - column:
+            name: PLAYER_TYPE
+            value: 'AI'
+        - column:
+            name: CIVILIZATION
+            value: 'RANDOM'
+        - column:
+            name: HUMAN_USER_ACCOUNT_ID
+            value: null

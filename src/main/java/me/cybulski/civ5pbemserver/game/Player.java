@@ -1,8 +1,10 @@
 package me.cybulski.civ5pbemserver.game;
 
 import lombok.*;
+import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -34,4 +36,37 @@ class Player extends BaseEntity {
 
     @ManyToOne
     private UserAccount humanUserAccount;
+
+    void changeToHuman() {
+        // FIXME test me
+        this.playerType = PlayerType.HUMAN;
+    }
+
+    void changeToAi() {
+        // FIXME test me
+        if (humanUserAccount != null) {
+            throw new CannotModifyGameException("Cannot change player with human player joined! Kick player first.");
+        }
+        this.playerType = PlayerType.AI;
+    }
+
+    void close() {
+        // FIXME test me
+        if (humanUserAccount != null) {
+            throw new CannotModifyGameException("Cannot change player with human player joined! Kick player first.");
+        }
+        Assert.state(PlayerType.HUMAN.equals(playerType), "Cannot join - the playerType is not HUMAN: " + playerType);
+        this.playerType = PlayerType.CLOSED;
+    }
+
+    void joinHuman(UserAccount newPlayer) {
+        if (!PlayerType.HUMAN.equals(playerType)) {
+            throw new CannotModifyGameException("Cannot join - the playerType is not HUMAN: " + playerType);
+        }
+        this.humanUserAccount = newPlayer;
+    }
+
+    void chooseCivilization(Civilization civilization) {
+        this.civilization = civilization;
+    }
 }

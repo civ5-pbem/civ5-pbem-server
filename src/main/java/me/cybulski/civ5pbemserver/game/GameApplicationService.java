@@ -3,12 +3,14 @@ package me.cybulski.civ5pbemserver.game;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
-import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
-import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
-import me.cybulski.civ5pbemserver.game.dto.PlayerOutputDTO;
+import me.cybulski.civ5pbemserver.game.dto.*;
+import me.cybulski.civ5pbemserver.game.exception.NoPermissionToModifyGameException;
+import me.cybulski.civ5pbemserver.user.UserAccount;
+import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,13 +25,16 @@ import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class GameApplicationService {
 
+    private final UserAccountApplicationService userAccountApplicationService;
     private final GameFactory gameFactory;
     private final GameRepository gameRepository;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO createNewGame(NewGameInputDTO newGameInputDTO) {
-        Game newGame = gameFactory.createNewGame(newGameInputDTO);
+        Game newGame = gameFactory.createNewGame(
+                userAccountApplicationService.getCurrentUserAccount().orElseThrow(RuntimeException::new),
+                newGameInputDTO);
         gameRepository.save(newGame);
 
         return convertToDTO(newGame);
@@ -47,6 +52,55 @@ public class GameApplicationService {
         return gameRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO changePlayerType(String gameId, String playerId, ChangePlayerTypeInputDTO changePlayerTypeInputDTO) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUserAccount = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        Assert.state(currentUserAccount.equals(game.getHost()), "Only host can change this setting!");
+
+        game.changePlayerType(playerId, changePlayerTypeInputDTO.getPlayerType());
+
+        return convertToDTO(game);
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO joinGame(String gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        game.joinGame(currentUser);
+
+        return convertToDTO(game);
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO chooseCivilization(String gameId, String playerId, ChooseCivilizationInputDTO chooseCivilizationInputDTO) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        if (!checkCanModifyPlayer(game, playerId, currentUser)) {
+            throw new NoPermissionToModifyGameException("Cannot modify player - no permission!");
+        }
+
+        game.chooseCivilization(playerId, chooseCivilizationInputDTO.getCivilization());
+
+        return convertToDTO(game);
+    }
+
+    private boolean checkCanModifyPlayer(Game game, String playerId, UserAccount userAccount) {
+        Player foundPlayer = game.getPlayers().stream()
+                .filter(player -> player.getId().equals(playerId))
+                .findFirst()
+                .orElseThrow(ResourceNotFoundException::new);
+
+        return (game.getHost().equals(userAccount) && PlayerType.AI.equals(foundPlayer.getPlayerType()))
+                || userAccount.equals(foundPlayer.getHumanUserAccount());
+    }
+
     private GameOutputDTO convertToDTO(Game game) {
         return GameOutputDTO
                 .builder()
@@ -56,7 +110,6 @@ public class GameApplicationService {
                 .gameState(game.getGameState())
                 .host(game.getHost().getUsername())
                 .mapSize(game.getMapSize())
-                .maxNumberOfPlayers(game.getMaxNumberOfPlayers())
                 .numberOfCityStates(game.getNumberOfCityStates())
                 .players(game.getPlayers()
                                  .stream()
