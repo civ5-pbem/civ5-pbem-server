@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@Transactional(readOnly = true)
 public class DefaultAuthenticationProvider implements AuthenticationProvider {
 
     private final UserAccountApplicationService userAccountApplicationService;
