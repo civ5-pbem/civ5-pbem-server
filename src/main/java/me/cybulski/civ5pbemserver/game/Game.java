@@ -59,6 +59,12 @@ class Game extends BaseEntity {
     }
 
     void joinGame(UserAccount userAccount) {
+        if (getPlayerList().stream()
+                .map(Player::getHumanUserAccount)
+                .anyMatch(userAccount::equals)) {
+            throw new CannotJoinGameException("Player already joined the game!");
+        }
+
         Player firstEmptyPlayer = getPlayerList().stream()
                 .filter(player -> PlayerType.HUMAN.equals(player.getPlayerType()))
                 .filter(player -> player.getHumanUserAccount() == null)

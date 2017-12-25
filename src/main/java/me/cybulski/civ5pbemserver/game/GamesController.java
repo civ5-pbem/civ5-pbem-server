@@ -33,4 +33,9 @@ public class GamesController {
     public GameOutputDTO findGameById(@PathVariable String gameId) {
         return gameApplicationService.findGameById(gameId);
     }
+
+    @RequestMapping(path = "{gameId}/join", method = RequestMethod.POST)
+    public GameOutputDTO joinGame(@PathVariable String gameId) {
+        return gameApplicationService.joinGame(gameId);
+    }
 }

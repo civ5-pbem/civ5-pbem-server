@@ -30,6 +30,18 @@ public class GameJoinTest extends BaseGameTest {
     }
 
     @Test
+    public void whenUserIsAlreadyJoined_thenPlayerCannotJoinAgain() {
+        // given
+        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+
+        // when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.joinGame(hostUserAccount);
+
+        // then
+        assertThatThrownBy(throwingCallable).isInstanceOf(CannotJoinGameException.class);
+    }
+
+    @Test
     public void whenUserAccountTriesToJoinAndThereIsPlace_thenPlayerJoins() {
         // given
         Game subject = testGameFactory.createNewTestGame(hostUserAccount);

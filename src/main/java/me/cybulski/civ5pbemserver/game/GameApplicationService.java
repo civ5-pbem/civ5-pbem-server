@@ -6,6 +6,7 @@ import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.PlayerOutputDTO;
+import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,17 @@ public class GameApplicationService {
     @Transactional(readOnly = true)
     public List<GameOutputDTO> findAllGames() {
         return gameRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO joinGame(String gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        game.joinGame(currentUser);
+
+        return convertToDTO(game);
     }
 
     private GameOutputDTO convertToDTO(Game game) {

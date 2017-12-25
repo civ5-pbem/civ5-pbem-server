@@ -22,7 +22,8 @@ import static org.mockito.Mockito.when;
 public class GameStartTest extends BaseGameTest {
 
     @Rule
-    public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
+    // FIXME don't mock so much
+    public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
 
     @Mock
     private PlayerFactory playerFactory;
