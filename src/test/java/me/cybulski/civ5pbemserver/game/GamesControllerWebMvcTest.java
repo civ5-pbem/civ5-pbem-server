@@ -39,6 +39,6 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.host").value(testUserAccount.getUsername()))
                 .andExpect(jsonPath("$.name").value(gameName))
                 .andExpect(jsonPath("$.description").value(gameDescription))
-                .andExpect(jsonPath("$.mapSize").value(mapSize));
+                .andExpect(jsonPath("$.mapSize").value(mapSize.toString()));
     }
 }

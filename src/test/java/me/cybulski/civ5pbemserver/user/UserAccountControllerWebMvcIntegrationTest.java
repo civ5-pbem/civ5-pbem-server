@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Michał Cybulski
  */
-public class UserAccountControllerTest extends WebMvcIntegrationTest {
+public class UserAccountControllerWebMvcIntegrationTest extends WebMvcIntegrationTest {
 
     @Autowired
     private UserAccountApplicationService userAccountApplicationService;

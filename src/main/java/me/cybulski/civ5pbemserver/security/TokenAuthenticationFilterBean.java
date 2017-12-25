@@ -2,44 +2,38 @@ package me.cybulski.civ5pbemserver.security;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * @author Michał Cybulski
  */
-@Component
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-//@Order(Ordered.HIGHEST_PRECEDENCE)
-class TokenAuthenticationFilterBean extends GenericFilterBean {
+class TokenAuthenticationFilterBean extends AbstractPreAuthenticatedProcessingFilter {
 
     private static final String ACCESS_TOKEN_HEADER = "Access-Token";
 
     private final DefaultUserDetailsService defaultUserDetailsService;
 
+    private UserDetails getUserDetails(String accessToken) {
+        return defaultUserDetailsService.loadUserByAccessToken(accessToken);
+    }
+
+    private String getCredentials(HttpServletRequest httpRequest) {
+        return httpRequest.getHeader(ACCESS_TOKEN_HEADER);
+    }
+
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String accessToken = httpRequest.getHeader(ACCESS_TOKEN_HEADER);
+    protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
+        String credentials = getCredentials(request);
 
-        if (accessToken != null) {
-            UserDetails userDetails = defaultUserDetailsService.loadUserByAccessToken(accessToken);
+        return credentials != null ? getUserDetails(credentials) : null;
+    }
 
-            final UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, accessToken, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-
-        chain.doFilter(request, response);
+    @Override
+    protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
+        return getCredentials(request);
     }
 }

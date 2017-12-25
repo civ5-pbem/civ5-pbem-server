@@ -2,7 +2,9 @@ package me.cybulski.civ5pbemserver.security;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final DefaultUserDetailsService defaultUserDetailsService;
+    private final DefaultAuthenticationProvider defaultAuthenticationProvider;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,10 +31,26 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .anyRequest().fullyAuthenticated()
                 .and()
                     .formLogin().permitAll().disable();
+        http.addFilter(tokenAuthenticationFilterBean());
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(defaultUserDetailsService);
+        auth.authenticationProvider(defaultAuthenticationProvider);
+        auth.userDetailsService(defaultUserDetailsService);
+    }
+
+    @Bean
+    public TokenAuthenticationFilterBean tokenAuthenticationFilterBean() throws Exception {
+        TokenAuthenticationFilterBean tokenAuthenticationFilterBean = new TokenAuthenticationFilterBean(defaultUserDetailsService);
+        tokenAuthenticationFilterBean.setAuthenticationManager(authenticationManagerBean());
+
+        return tokenAuthenticationFilterBean;
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 }

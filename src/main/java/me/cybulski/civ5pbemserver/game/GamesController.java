@@ -52,7 +52,9 @@ public class GamesController {
         return PlayerOutputDTO.builder()
                        .playerNumber(player.getPlayerNumber())
                        .civilization(player.getCivilization())
-                       .humanUserAccount(player.getHumanUserAccount().getUsername())
+                       .humanUserAccount(player.getHumanUserAccount() != null
+                                                 ? player.getHumanUserAccount().getUsername()
+                                                 : null)
                        .playerType(player.getPlayerType())
                        .build();
     }
