@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Michał Cybulski
  */
-public class UserAccountApplicationServiceTest extends IntegrationTest {
+public class UserAccountApplicationServiceIntegrationTest extends IntegrationTest {
 
     @Autowired
     private UserAccountApplicationService userAccountApplicationService;

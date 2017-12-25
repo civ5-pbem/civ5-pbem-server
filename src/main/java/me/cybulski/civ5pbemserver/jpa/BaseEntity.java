@@ -1,5 +1,6 @@
 package me.cybulski.civ5pbemserver.jpa;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@EqualsAndHashCode(of = "id")
 public class BaseEntity {
 
     @Id
