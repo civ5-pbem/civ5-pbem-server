@@ -15,6 +15,7 @@ import java.util.List;
 @Getter
 public class GameOutputDTO {
 
+    private String id;
     private String host;
     private String name;
     private String description;

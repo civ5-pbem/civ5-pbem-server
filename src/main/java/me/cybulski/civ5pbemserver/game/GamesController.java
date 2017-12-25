@@ -37,6 +37,7 @@ public class GamesController {
     private GameOutputDTO convertToDTO(Game game) {
         return GameOutputDTO
                        .builder()
+                       .id(game.getId())
                        .name(game.getName())
                        .description(game.getDescription())
                        .gameState(game.getGameState())
@@ -54,6 +55,7 @@ public class GamesController {
 
     private PlayerOutputDTO convertToDTO(Player player) {
         return PlayerOutputDTO.builder()
+                       .id(player.getId())
                        .playerNumber(player.getPlayerNumber())
                        .civilization(player.getCivilization())
                        .humanUserAccount(player.getHumanUserAccount() != null

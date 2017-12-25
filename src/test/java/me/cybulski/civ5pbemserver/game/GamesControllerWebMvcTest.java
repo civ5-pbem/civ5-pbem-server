@@ -36,7 +36,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.host").value(testUserAccount.getUsername()))
+                .andExpect(jsonPath("$.players").exists())
                 .andExpect(jsonPath("$.name").value(gameName))
                 .andExpect(jsonPath("$.description").value(gameDescription))
                 .andExpect(jsonPath("$.maxNumberOfPlayers").value(mapSize.getMaxNumberOfPlayers()))
