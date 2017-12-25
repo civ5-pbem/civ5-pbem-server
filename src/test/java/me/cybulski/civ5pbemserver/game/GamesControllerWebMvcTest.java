@@ -30,6 +30,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         ResultActions resultActions =
                 mockMvc.perform(authenticated(preparePost("/games/new-game", newGameInputDTO), testUserAccount));
 
+        // and
+        testEntityManager.flush();
+
         // then
         resultActions
                 .andExpect(status().is(200))

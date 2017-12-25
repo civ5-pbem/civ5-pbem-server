@@ -5,6 +5,8 @@ import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Set;
@@ -41,9 +43,13 @@ class Game extends BaseEntity {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private Set<Player> players;
 
-    @Size(max = 12)
-    private int maxNumberOfPlayers;
+    @NotNull
+    @Min(0)
+    @Max(12)
+    private Integer maxNumberOfPlayers;
 
-    @Size(max = 58)
-    private int numberOfCityStates;
+    @NotNull
+    @Min(0)
+    @Max(58)
+    private Integer numberOfCityStates;
 }

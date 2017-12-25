@@ -282,3 +282,11 @@ databaseChangeLog:
         - column:
             name: ROLES
             value: 'ROLE_USER'
+- changeSet:
+    id: 1514167531000-12
+    author: michal@cybulski.me
+    changes:
+    - dropNotNullConstraint:
+        tableName: PLAYER
+        columnName: HUMAN_USER_ACCOUNT_ID
+        columnDataType: VARCHAR(255)
