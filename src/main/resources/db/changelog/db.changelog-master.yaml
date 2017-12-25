@@ -290,3 +290,104 @@ databaseChangeLog:
         tableName: PLAYER
         columnName: HUMAN_USER_ACCOUNT_ID
         columnDataType: VARCHAR(255)
+- changeSet:
+    id: 1514198934000-13
+    author: michal@cybulski.me
+    context: test
+    changes:
+    - insert:
+        tableName: GAME
+        columns:
+        - column:
+            name: ID
+            value: '09d50664-e171-45c6-a04c-d650caa4dc3f'
+        - column:
+            name: CREATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: UPDATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: VERSION
+            value: 1
+        - column:
+            name: HOST_ID
+            value: '3942c91c-c502-4be8-8b74-a8a651d531a5'
+        - column:
+            name: NAME
+            value: 'Test game'
+        - column:
+            name: DESCRIPTION
+            value: 'Test game description!'
+        - column:
+            name: MAP_SIZE
+            value: 'DUEL'
+        - column:
+            name: GAME_STATE
+            value: 'WAITING_FOR_PLAYERS'
+        - column:
+            name: MAX_NUMBER_OF_PLAYERS
+            valueNumeric: 2
+        - column:
+            name: NUMBER_OF_CITY_STATES
+            valueNumeric: 4
+    - insert:
+        tableName: PLAYER
+        columns:
+        - column:
+            name: ID
+            value: 'e786803e-b6c9-4910-9122-4194734e73a7'
+        - column:
+            name: CREATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: UPDATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: VERSION
+            value: 1
+        - column:
+            name: GAME_ID
+            value: '09d50664-e171-45c6-a04c-d650caa4dc3f'
+        - column:
+            name: PLAYER_NUMBER
+            valueNumeric: 1
+        - column:
+            name: PLAYER_TYPE
+            value: 'HUMAN'
+        - column:
+            name: CIVILIZATION
+            value: 'RANDOM'
+        - column:
+            name: HUMAN_USER_ACCOUNT_ID
+            value: '3942c91c-c502-4be8-8b74-a8a651d531a5'
+    - insert:
+        tableName: PLAYER
+        columns:
+        - column:
+            name: ID
+            value: '71f73c36-e4af-4a1d-8f56-7874f542a905'
+        - column:
+            name: CREATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: UPDATED_AT
+            valueDate: '2017-12-20T01:46:55'
+        - column:
+            name: VERSION
+            value: 1
+        - column:
+            name: GAME_ID
+            value: '09d50664-e171-45c6-a04c-d650caa4dc3f'
+        - column:
+            name: PLAYER_NUMBER
+            valueNumeric: 2
+        - column:
+            name: PLAYER_TYPE
+            value: 'HUMAN'
+        - column:
+            name: CIVILIZATION
+            value: 'RANDOM'
+        - column:
+            name: HUMAN_USER_ACCOUNT_ID
+            value: null

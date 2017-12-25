@@ -10,8 +10,6 @@ import javax.validation.constraints.NotNull;
 /**
  * @author Michał Cybulski
  */
-// FIXME add schema migration
-// FIXME add tests
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "game_id", "playerNumber" }))
 @Builder

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import static me.cybulski.civ5pbemserver.config.SecurityConstants.ANONYMOUS_USER;
+import static me.cybulski.civ5pbemserver.config.SecurityConstants.ROLE_ANONYMOUS;
+
 /**
  * @author Michał Cybulski
  */
@@ -21,9 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("user-accounts")
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserAccountController {
-
-    private static final String ANONYMOUS_USER = "anonymousUser";
-    private static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 
     private final UserAccountApplicationService userAccountApplicationService;
 
