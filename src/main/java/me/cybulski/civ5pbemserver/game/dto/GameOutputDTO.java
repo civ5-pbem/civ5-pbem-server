@@ -21,5 +21,6 @@ public class GameOutputDTO {
     private MapSize mapSize;
     private GameState gameState;
     private List<PlayerOutputDTO> players;
+    private int maxNumberOfPlayers;
     private int numberOfCityStates;
 }

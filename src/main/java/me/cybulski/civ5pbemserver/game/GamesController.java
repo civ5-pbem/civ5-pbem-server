@@ -39,6 +39,7 @@ public class GamesController {
                        .gameState(game.getGameState())
                        .host(game.getHost().getUsername())
                        .mapSize(game.getMapSize())
+                       .maxNumberOfPlayers(game.getMaxNumberOfPlayers())
                        .numberOfCityStates(game.getNumberOfCityStates())
                        .players(game.getPlayers()
                                         .stream()
