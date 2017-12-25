@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -263,5 +264,36 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(game.getId()))
                 .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+    }
+
+    @Test
+    public void whenAllPlayersAreReady_thenTheGameCanBeStartedByHost() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.gameState").value(WAITING_FOR_FIRST_MOVE.toString()));
+    }
+
+    @Test
+    public void whenAllPlayersAreReady_thenTheGameCannotBeStartedByAnotherPlayer() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
     }
 }

@@ -65,4 +65,9 @@ public class GamesController {
     public GameOutputDTO joinGame(@PathVariable String gameId) {
         return gameApplicationService.joinGame(gameId);
     }
+
+    @RequestMapping(path = "{gameId}/start", method = RequestMethod.POST)
+    public GameOutputDTO startGame(@PathVariable String gameId) {
+        return gameApplicationService.startGame(gameId);
+    }
 }

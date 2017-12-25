@@ -119,6 +119,20 @@ public class GameApplicationService {
         return convertToDTO(game);
     }
 
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO startGame(String gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
+        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+        if (!game.getHost().equals(currentUser)) {
+            throw new NoPermissionToModifyGameException("Only host can start the game!");
+        }
+        game.startGame();
+
+        return convertToDTO(game);
+    }
+
     private boolean checkCanModifyPlayer(Game game, String playerId, UserAccount userAccount) {
         Player foundPlayer = game.getPlayers().stream()
                 .filter(player -> player.getId().equals(playerId))
