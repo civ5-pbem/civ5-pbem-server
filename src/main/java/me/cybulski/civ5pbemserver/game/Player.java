@@ -38,12 +38,10 @@ class Player extends BaseEntity {
     private UserAccount humanUserAccount;
 
     void changeToHuman() {
-        // FIXME test me
         this.playerType = PlayerType.HUMAN;
     }
 
     void changeToAi() {
-        // FIXME test me
         if (humanUserAccount != null) {
             throw new CannotModifyGameException("Cannot change player with human player joined! Kick player first.");
         }
@@ -51,7 +49,6 @@ class Player extends BaseEntity {
     }
 
     void close() {
-        // FIXME test me
         if (humanUserAccount != null) {
             throw new CannotModifyGameException("Cannot change player with human player joined! Kick player first.");
         }
@@ -60,13 +57,18 @@ class Player extends BaseEntity {
     }
 
     void joinHuman(UserAccount newPlayer) {
-        if (!PlayerType.HUMAN.equals(playerType)) {
-            throw new CannotModifyGameException("Cannot join - the playerType is not HUMAN: " + playerType);
-        }
         this.humanUserAccount = newPlayer;
     }
 
     void chooseCivilization(Civilization civilization) {
         this.civilization = civilization;
+    }
+
+    public void kick() {
+        this.humanUserAccount = null;
+    }
+
+    public void leave() {
+        this.humanUserAccount = null;
     }
 }

@@ -36,18 +36,29 @@ public class GamesController {
         return gameApplicationService.findGameById(gameId);
     }
 
-    @RequestMapping(path = "{gameId}/players/{playerId}/change-player-type")
+    @RequestMapping(path = "{gameId}/players/{playerId}/change-player-type", method = RequestMethod.POST)
     public GameOutputDTO changePlayerType(@PathVariable String gameId,
                                           @PathVariable String playerId,
                                           @Validated @RequestBody ChangePlayerTypeInputDTO changePlayerTypeInputDTO) {
         return gameApplicationService.changePlayerType(gameId, playerId, changePlayerTypeInputDTO);
     }
 
-    @RequestMapping(path = "{gameId}/players/{playerId}/choose-civilization")
+    @RequestMapping(path = "{gameId}/players/{playerId}/choose-civilization", method = RequestMethod.POST)
     public GameOutputDTO chooseCivilization(@PathVariable String gameId,
                                             @PathVariable String playerId,
                                             @Validated @RequestBody ChooseCivilizationInputDTO chooseCivilizationInputDTO) {
         return gameApplicationService.chooseCivilization(gameId, playerId, chooseCivilizationInputDTO);
+    }
+
+    @RequestMapping(path = "{gameId}/players/{playerId}/kick", method = RequestMethod.POST)
+    public GameOutputDTO kickPlayer(@PathVariable String gameId,
+                                            @PathVariable String playerId) {
+        return gameApplicationService.kickPlayer(gameId, playerId);
+    }
+
+    @RequestMapping(path = "{gameId}/leave", method = RequestMethod.POST)
+    public GameOutputDTO leaveGame(@PathVariable String gameId) {
+        return gameApplicationService.leaveGame(gameId);
     }
 
     @RequestMapping(path = "{gameId}/join", method = RequestMethod.POST)
