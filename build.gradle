@@ -15,6 +15,7 @@ buildscript {
 }
 
 plugins {
+    id 'jacoco'
     id 'org.liquibase.gradle' version '1.2.4'
 }
 
@@ -33,6 +34,9 @@ repositories {
     maven { url "https://repo.spring.io/milestone" }
 }
 
+configurations {
+    jacocoRuntime
+}
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
@@ -59,4 +63,11 @@ liquibase {
     }
 
     runList = 'main'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
 }
