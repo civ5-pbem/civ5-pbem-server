@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Getter
 class GameTurn extends BaseEntity {
 
