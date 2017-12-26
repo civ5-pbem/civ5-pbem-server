@@ -1,5 +1,6 @@
 package me.cybulski.civ5pbemserver.game;
 
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import org.junit.Test;
 

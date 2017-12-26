@@ -1,6 +1,7 @@
 package me.cybulski.civ5pbemserver.game;
 
 import lombok.*;
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.exception.CannotJoinGameException;
 import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;

@@ -1,4 +1,17 @@
 package me.cybulski.civ5pbemserver.civilization.dto;
 
-public class CivilizationListDTO {
+import lombok.*;
+import me.cybulski.civ5pbemserver.civilization.Civilization;
+
+/**
+ * @author Krzysztof Cybulski
+ */
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+public class CivilizationDTO {
+
+    private String code;
+    private String name;
+    private String leader;
 }

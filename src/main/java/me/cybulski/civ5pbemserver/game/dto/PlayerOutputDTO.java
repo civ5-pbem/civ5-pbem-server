@@ -1,7 +1,7 @@
 package me.cybulski.civ5pbemserver.game.dto;
 
 import lombok.*;
-import me.cybulski.civ5pbemserver.game.Civilization;
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.game.PlayerType;
 
 /**

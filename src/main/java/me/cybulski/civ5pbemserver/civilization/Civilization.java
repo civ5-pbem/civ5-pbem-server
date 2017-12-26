@@ -1,4 +1,4 @@
-package me.cybulski.civ5pbemserver.game;
+package me.cybulski.civ5pbemserver.civilization;
 
 import lombok.AccessLevel;
 import lombok.Getter;
