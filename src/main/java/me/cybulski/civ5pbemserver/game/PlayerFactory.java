@@ -1,5 +1,6 @@
 package me.cybulski.civ5pbemserver.game;
 
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.springframework.stereotype.Component;
 

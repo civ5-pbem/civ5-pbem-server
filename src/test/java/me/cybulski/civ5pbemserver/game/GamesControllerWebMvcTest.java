@@ -1,6 +1,7 @@
 package me.cybulski.civ5pbemserver.game;
 
 import me.cybulski.civ5pbemserver.WebMvcIntegrationTest;
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;

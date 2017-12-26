@@ -1,6 +1,7 @@
 package me.cybulski.civ5pbemserver.game;
 
 import lombok.*;
+import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
