@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Krzysztof Cybulski
  */
-public class CivilizationControllerWebMvcTest extends WebMvcIntegrationTest{
+public class CivilizationControllerWebMvcTest extends WebMvcIntegrationTest {
 
     private final TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
     private UserAccount sampleUserAccount;
