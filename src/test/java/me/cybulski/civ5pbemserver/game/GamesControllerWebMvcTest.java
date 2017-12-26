@@ -9,8 +9,13 @@ import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Michał Cybulski
  */
 public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
+
+    @Autowired
+    private GameRepository gameRepository;
 
     private final TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
     private Game game;
@@ -35,7 +43,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
         // setting up the game
         mapSize = MapSize.DUEL;
-        game = new TestGameFactory().createNewTestGame(hostUserAccount, mapSize);
+        game = new TestGameFactory(gameRepository).createNewTestGame(hostUserAccount, mapSize);
         testEntityManager.persistAndFlush(game);
     }
 
@@ -86,7 +94,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
         // when
         ResultActions resultActions =
-                mockMvc.perform(authenticated(prepareGet("/games/"), hostUserAccount));
+                mockMvc.perform(authenticated(prepareGet("/games"), hostUserAccount));
 
         // then
         resultActions
@@ -264,5 +272,100 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(game.getId()))
                 .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+    }
+
+    @Test
+    public void whenAllPlayersAreReady_thenTheGameCanBeStartedByHost() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.gameState").value(WAITING_FOR_FIRST_MOVE.toString()));
+    }
+
+    @Test
+    public void whenAllPlayersAreReady_thenTheGameCannotBeStartedByAnotherPlayer() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void whenGameIsStarted_thenHostCanUploadSave() throws Exception {
+        // given
+        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()
+                                                                                      + "/finish-turn")
+                                                                            .file(file),
+                                                                    hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()));
+    }
+
+    @Test
+    public void whenGameIsStarted_thenOnlyHostCanUploadSave() throws Exception {
+        // given
+        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()
+                                                                                      + "/finish-turn")
+                                                                            .file(file),
+                                                                    secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void whenFirstMoveIsDone_thenSecondPlayerCanDownloadSave() throws Exception {
+        // given
+        byte[] bytes = "Spring Framework".getBytes();
+        MockMultipartFile file = prepareFileAndStartGame(bytes);
+
+        // and
+        mockMvc.perform(authenticated(multipart("/games/" + game.getId() + "/finish-turn").file(file),
+                                      hostUserAccount));
+
+        // when
+        ResultActions resultActions = mockMvc.perform(authenticated(prepareGet("/games/" + game.getId() + "/save-game"),
+                                                                    secondUserAccount));
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(content().bytes(bytes));
+    }
+
+    private MockMultipartFile prepareFileAndStartGame(byte[] bytes) throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "test.txt",
+                                                       "text/plain",
+                                                       bytes);
+
+        // and
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"), hostUserAccount));
+        return file;
     }
 }

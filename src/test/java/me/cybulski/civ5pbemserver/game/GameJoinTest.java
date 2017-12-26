@@ -3,6 +3,7 @@ package me.cybulski.civ5pbemserver.game;
 import me.cybulski.civ5pbemserver.game.exception.CannotJoinGameException;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +15,12 @@ import static org.mockito.Mockito.mock;
  */
 public class GameJoinTest extends BaseGameTest {
 
-    private TestGameFactory testGameFactory = new TestGameFactory();
+    private TestGameFactory testGameFactory;
+
+    @Before
+    public void setUp() {
+        testGameFactory = new TestGameFactory(gameRepository);
+    }
 
     @Test
     public void whenNewGameIsCreated_thenHostIsFirstPlayer() {

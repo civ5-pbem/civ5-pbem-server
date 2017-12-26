@@ -2,6 +2,7 @@ package me.cybulski.civ5pbemserver.game;
 
 import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ChangeCivilizationGameTest extends BaseGameTest {
 
-    private TestGameFactory testGameFactory = new TestGameFactory();
+    private TestGameFactory testGameFactory;
+
+    @Before
+    public void setUp() {
+        testGameFactory = new TestGameFactory(gameRepository);
+    }
 
     @Test
     public void whenCivilizationIsChanged_thenChangesAreVisible() {

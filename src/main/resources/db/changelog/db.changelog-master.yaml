@@ -456,3 +456,85 @@ databaseChangeLog:
     - delete:
         tableName: USER_ACCOUNT
         where: "ID = '3942c91c-c502-4be8-8b74-a8a651d531a5'"
+
+- changeSet:
+    id: 1514248896000-16
+    author: michal@cybulski.me
+    changes:
+    - createTable:
+        tableName: GAME_TURN
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: ID
+            type: VARCHAR(255)
+        - column:
+            name: CREATED_AT
+            type: TIMESTAMP
+        - column:
+            name: UPDATED_AT
+            type: TIMESTAMP
+        - column:
+            constraints:
+              nullable: false
+            name: VERSION
+            type: BIGINT(19)
+        - column:
+            constraints:
+              nullable: false
+            name: GAME_ID
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: CURRENT_PLAYER_ID
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: TURN_NUMBER
+            type: INT(10)
+        - column:
+            name: PREVIOUS_GAME_TURN_ID
+            type: VARCHAR(255)
+        - column:
+            name: SAVE_FILENAME
+            type: VARCHAR(255)
+    - addPrimaryKey:
+        tableName: GAME_TURN
+        columnNames: ID
+        constraintName: PK_GAME_TURN_ID
+    - addForeignKeyConstraint:
+        constraintName: FK_GAME_TURN_GAME_ID
+        baseTableName: GAME_TURN
+        baseColumnNames: GAME_ID
+        referencedTableName: GAME
+        referencedColumnNames: ID
+    - addForeignKeyConstraint:
+        constraintName: FK_GAME_TURN_CURRENT_PLAYER_ID
+        baseTableName: GAME_TURN
+        baseColumnNames: CURRENT_PLAYER_ID
+        referencedTableName: PLAYER
+        referencedColumnNames: ID
+    - addForeignKeyConstraint:
+        constraintName: FK_GAME_TURN_PREVIOUS_GAME_TURN_ID
+        baseTableName: GAME_TURN
+        baseColumnNames: PREVIOUS_GAME_TURN_ID
+        referencedTableName: GAME_TURN
+        referencedColumnNames: ID
+    - addUniqueConstraint:
+        tableName: GAME_TURN
+        columnNames: GAME_ID,CURRENT_PLAYER_ID,TURN_NUMBER
+        constraintName: UK_GAME_TURN_GAME_ID_CURRENT_PLAYER_ID_TURN_NUMBER
+    - addColumn:
+        tableName: GAME
+        columns:
+        - name: CURRENT_GAME_TURN_ID
+          type: VARCHAR(255)
+    - addForeignKeyConstraint:
+        constraintName: FK_GAME_CURRENT_GAME_TURN_ID
+        baseTableName: GAME
+        baseColumnNames: CURRENT_GAME_TURN_ID
+        referencedTableName: GAME_TURN
+        referencedColumnNames: ID

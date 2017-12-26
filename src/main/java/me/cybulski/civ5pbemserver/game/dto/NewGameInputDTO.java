@@ -11,7 +11,6 @@ import javax.validation.constraints.Size;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class NewGameInputDTO {
 

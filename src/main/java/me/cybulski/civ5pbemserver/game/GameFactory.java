@@ -15,6 +15,7 @@ import java.util.HashSet;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class GameFactory {
 
+    private final GameRepository gameRepository;
     private final PlayerFactory playerFactory;
 
     public Game createNewGame(UserAccount host, NewGameInputDTO newGameInputDTO) {
@@ -32,6 +33,6 @@ class GameFactory {
                              .build();
         newGame.getPlayers().addAll(playerFactory.createNewPlayers(host, newGame, maxNumberOfPlayers));
 
-        return newGame;
+        return gameRepository.save(newGame);
     }
 }

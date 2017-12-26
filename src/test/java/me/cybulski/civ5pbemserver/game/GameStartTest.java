@@ -1,20 +1,18 @@
 package me.cybulski.civ5pbemserver.game;
 
-import com.google.common.collect.ImmutableSet;
 import me.cybulski.civ5pbemserver.game.exception.CannotStartGameException;
+import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
+import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Michał Cybulski
@@ -22,28 +20,21 @@ import static org.mockito.Mockito.when;
 public class GameStartTest extends BaseGameTest {
 
     @Rule
-    // FIXME don't mock so much
     public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
 
-    @Mock
-    private PlayerFactory playerFactory;
+    private TestGameFactory testGameFactory;
+    private UserAccount hostUserAccount;
+    private Game subject;
+
+    @Before
+    public void setUp() {
+        testGameFactory = new TestGameFactory(gameRepository);
+        hostUserAccount = new TestUserAccountFactory().createNewUserAccount("host@test.com", "hostUser");
+        subject = testGameFactory.createNewTestGame(hostUserAccount, MapSize.DUEL);
+    }
 
     @Test
     public void whenThereAreEmptyHumanPlayers_thenCannotStartGame() {
-        // given
-        Player firstPlayer = mock(Player.class);
-        when(firstPlayer.getHumanUserAccount()).thenReturn(hostUserAccount);
-        when(firstPlayer.getPlayerType()).thenReturn(PlayerType.HUMAN);
-        Player secondPlayer = mock(Player.class);
-        when(secondPlayer.getPlayerType()).thenReturn(PlayerType.HUMAN);
-
-        // and
-        ImmutableSet<Player> players = ImmutableSet.of(firstPlayer, secondPlayer);
-        when(playerFactory.createNewPlayers(any(), any(), any())).thenReturn(players);
-
-        // and
-        Game subject = new TestGameFactory(playerFactory).createNewTestGame(hostUserAccount);
-
         // when
         ThrowableAssert.ThrowingCallable throwingCallable = subject::startGame;
 
@@ -54,22 +45,10 @@ public class GameStartTest extends BaseGameTest {
     @Test
     public void whenThereAreOnlyAiAndClosedLeft_thenGameCanBeStarted() {
         // given
-        Player firstPlayer = mock(Player.class);
-        when(firstPlayer.getHumanUserAccount()).thenReturn(hostUserAccount);
-        when(firstPlayer.getPlayerType()).thenReturn(PlayerType.HUMAN);
-        Player secondPlayer = mock(Player.class);
-        when(secondPlayer.getPlayerType()).thenReturn(PlayerType.AI);
-        Player thirdPlayer = mock(Player.class);
-        when(thirdPlayer.getPlayerType()).thenReturn(PlayerType.AI);
-        Player fourthPlayer = mock(Player.class);
-        when(fourthPlayer.getPlayerType()).thenReturn(PlayerType.CLOSED);
+        UserAccount secondUser = new TestUserAccountFactory().createNewUserAccount("second@test.com", "secondUser");
 
         // and
-        ImmutableSet<Player> players = ImmutableSet.of(firstPlayer, secondPlayer, thirdPlayer, fourthPlayer);
-        when(playerFactory.createNewPlayers(any(), any(), any())).thenReturn(players);
-
-        // and
-        Game subject = new TestGameFactory(playerFactory).createNewTestGame(hostUserAccount);
+        subject.joinGame(secondUser);
 
         // when
         subject.startGame();

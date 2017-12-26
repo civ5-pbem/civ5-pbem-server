@@ -8,17 +8,11 @@ import me.cybulski.civ5pbemserver.user.UserAccount;
  */
 public class TestGameFactory {
 
-    private PlayerFactory playerFactory;
     private GameFactory gameFactory;
 
-    public TestGameFactory() {
-        this.playerFactory = new PlayerFactory();
-        this.gameFactory = new GameFactory(playerFactory);
-    }
-
-    public TestGameFactory(PlayerFactory playerFactory) {
-        this.playerFactory = playerFactory;
-        this.gameFactory = new GameFactory(playerFactory);
+    public TestGameFactory(GameRepository gameRepository) {
+        PlayerFactory playerFactory = new PlayerFactory();
+        this.gameFactory = new GameFactory(gameRepository, playerFactory);
     }
 
     private NewGameInputDTO.NewGameInputDTOBuilder newGameInputDTOBuilder = NewGameInputDTO
