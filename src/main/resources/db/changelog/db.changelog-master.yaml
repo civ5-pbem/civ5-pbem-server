@@ -456,7 +456,6 @@ databaseChangeLog:
     - delete:
         tableName: USER_ACCOUNT
         where: "ID = '3942c91c-c502-4be8-8b74-a8a651d531a5'"
-
 - changeSet:
     id: 1514248896000-16
     author: michal@cybulski.me
@@ -538,3 +537,11 @@ databaseChangeLog:
         baseColumnNames: CURRENT_GAME_TURN_ID
         referencedTableName: GAME_TURN
         referencedColumnNames: ID
+- changeSet:
+    id: 1514304838000-17
+    author: michal@cybulski.me
+    changes:
+    - addUniqueConstraint:
+        tableName: USER_ACCOUNT
+        columnNames: USERNAME
+        constraintName: UK_USER_ACCOUNT_USERNAME
