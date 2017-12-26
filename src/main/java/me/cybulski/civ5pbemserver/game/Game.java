@@ -55,6 +55,9 @@ class Game extends BaseEntity {
     @Max(58)
     private Integer numberOfCityStates;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private GameTurn currentGameTurn;
+
     public List<Player> getPlayerList() {
         return players.stream()
                 .sorted(Comparator.comparingInt(Player::getPlayerNumber))
@@ -133,11 +136,18 @@ class Game extends BaseEntity {
                 .noneMatch(player -> player.getHumanUserAccount() == null);
     }
 
-    public void kickPlayer(String playerId) {
+    void kickPlayer(String playerId) {
         findPlayer(playerId).kick();
     }
 
-    public void leave(UserAccount currentUser) {
+    void leave(UserAccount currentUser) {
         findPlayer(currentUser).orElseThrow(ResourceNotFoundException::new).leave();
+    }
+
+    void nextTurn(GameTurn nextTurn) {
+        if (this.currentGameTurn != null && GameState.WAITING_FOR_FIRST_MOVE.equals(this.gameState)) {
+            this.gameState = GameState.IN_PROGRESS;
+        }
+        this.currentGameTurn = nextTurn;
     }
 }

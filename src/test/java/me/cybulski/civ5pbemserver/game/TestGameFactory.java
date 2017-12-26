@@ -10,9 +10,9 @@ public class TestGameFactory {
 
     private GameFactory gameFactory;
 
-    public TestGameFactory() {
+    public TestGameFactory(GameRepository gameRepository) {
         PlayerFactory playerFactory = new PlayerFactory();
-        this.gameFactory = new GameFactory(playerFactory);
+        this.gameFactory = new GameFactory(gameRepository, playerFactory);
     }
 
     private NewGameInputDTO.NewGameInputDTOBuilder newGameInputDTOBuilder = NewGameInputDTO

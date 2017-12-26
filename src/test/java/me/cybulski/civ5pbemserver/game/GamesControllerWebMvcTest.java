@@ -8,6 +8,7 @@ import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
@@ -18,6 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Michał Cybulski
  */
 public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
+
+    @Autowired
+    private GameRepository gameRepository;
 
     private final TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
     private Game game;
@@ -35,7 +39,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
         // setting up the game
         mapSize = MapSize.DUEL;
-        game = new TestGameFactory().createNewTestGame(hostUserAccount, mapSize);
+        game = new TestGameFactory(gameRepository).createNewTestGame(hostUserAccount, mapSize);
         testEntityManager.persistAndFlush(game);
     }
 

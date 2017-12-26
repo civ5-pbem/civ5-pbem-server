@@ -28,6 +28,7 @@ public class GameApplicationService {
     private final UserAccountApplicationService userAccountApplicationService;
     private final GameFactory gameFactory;
     private final GameRepository gameRepository;
+    private final GameTurnFactory gameTurnFactory;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
@@ -35,7 +36,6 @@ public class GameApplicationService {
         Game newGame = gameFactory.createNewGame(
                 userAccountApplicationService.getCurrentUserAccount().orElseThrow(RuntimeException::new),
                 newGameInputDTO);
-        gameRepository.save(newGame);
 
         return convertToDTO(newGame);
     }
@@ -129,6 +129,7 @@ public class GameApplicationService {
             throw new NoPermissionToModifyGameException("Only host can start the game!");
         }
         game.startGame();
+        gameTurnFactory.createFirstGameTurn(game);
 
         return convertToDTO(game);
     }

@@ -11,7 +11,6 @@ import java.util.List;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class GameOutputDTO {
 

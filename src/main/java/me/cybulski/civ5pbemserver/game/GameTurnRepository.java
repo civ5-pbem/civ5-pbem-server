@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * @author Michał Cybulski
  */
-interface GameRepository extends JpaRepository<Game, String> {
+interface GameTurnRepository extends JpaRepository<GameTurn, String> {
 }

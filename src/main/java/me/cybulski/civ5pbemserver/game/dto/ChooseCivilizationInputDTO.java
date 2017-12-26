@@ -8,7 +8,6 @@ import me.cybulski.civ5pbemserver.game.Civilization;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class ChooseCivilizationInputDTO {
 
