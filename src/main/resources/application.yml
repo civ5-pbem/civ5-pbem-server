@@ -17,4 +17,4 @@ spring:
 civ5:
   mail.from: # configure me
   data-dir: ./data
-  saves-dir: ./data/saves
+  saves-dir: /home/michal/civ5-saves
