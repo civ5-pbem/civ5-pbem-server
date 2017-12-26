@@ -7,6 +7,7 @@ import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
+import me.cybulski.civ5pbemserver.util.TimestampStringMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Michał Cybulski
@@ -32,9 +31,13 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     private UserAccount hostUserAccount;
     private UserAccount secondUserAccount;
     private MapSize mapSize;
+    private TestGameFactory testGameFactory;
 
     @Before
     public void setUp() {
+        // setting up dependencies
+        testGameFactory = new TestGameFactory(gameRepository);
+
         // setting up the users
         hostUserAccount = testUserAccountFactory.createNewUserAccount("host@test.com", "hostUser");
         secondUserAccount = testUserAccountFactory.createNewUserAccount("second@test.com", "secondUser");
@@ -43,7 +46,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
         // setting up the game
         mapSize = MapSize.DUEL;
-        game = new TestGameFactory(gameRepository).createNewTestGame(hostUserAccount, mapSize);
+        game = testGameFactory.createNewTestGame(hostUserAccount, mapSize);
         testEntityManager.persistAndFlush(game);
     }
 
@@ -92,6 +95,12 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
     @Test
     public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
+        // given
+        Game secondGame = testGameFactory.createNewTestGame(hostUserAccount);
+        testEntityManager.persistAndFlush(secondGame);
+        Game thirdGame = testGameFactory.createNewTestGame(hostUserAccount);
+        testEntityManager.persistAndFlush(thirdGame);
+
         // when
         ResultActions resultActions =
                 mockMvc.perform(authenticated(prepareGet("/games"), hostUserAccount));
@@ -99,8 +108,10 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(game.getId()));
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$.[0].id").value(game.getId()))
+                .andExpect(jsonPath("$.[1].id").value(secondGame.getId()))
+                .andExpect(jsonPath("$.[2].id").value(thirdGame.getId()));
     }
 
     @Test
@@ -287,7 +298,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.gameState").value(WAITING_FOR_FIRST_MOVE.toString()));
+                .andExpect(jsonPath("$.gameState").value(WAITING_FOR_FIRST_MOVE.toString()))
+                .andExpect(jsonPath("$.currentlyMovingPlayer").value(hostUserAccount.getUsername()))
+                .andExpect(jsonPath("$.lastMoveFinished").value(new TimestampStringMatcher()));
     }
 
     @Test
