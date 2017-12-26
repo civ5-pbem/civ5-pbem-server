@@ -7,7 +7,6 @@ import lombok.*;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class RegisterOutputDTO {
     private String email;

@@ -9,7 +9,6 @@ import java.util.Set;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class CurrentUserOutputDTO {
     private String email;

@@ -307,14 +307,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     @Test
     public void whenGameIsStarted_thenHostCanUploadSave() throws Exception {
         // given
-        MockMultipartFile file = new MockMultipartFile("file",
-                                                       "test.txt",
-                                                       "text/plain",
-                                                       "Spring Framework".getBytes());
-
-        // and
-        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
-        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"), hostUserAccount));
+        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
 
         // when
         ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()
@@ -329,17 +322,28 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     }
 
     @Test
+    public void whenGameIsStarted_thenOnlyHostCanUploadSave() throws Exception {
+        // given
+        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()
+                                                                                      + "/finish-turn")
+                                                                            .file(file),
+                                                                    secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
+    }
+
+    @Test
     public void whenFirstMoveIsDone_thenSecondPlayerCanDownloadSave() throws Exception {
         // given
         byte[] bytes = "Spring Framework".getBytes();
-        MockMultipartFile file = new MockMultipartFile("file",
-                                                       "test.txt",
-                                                       "text/plain",
-                                                       bytes);
+        MockMultipartFile file = prepareFileAndStartGame(bytes);
 
         // and
-        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
-        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"), hostUserAccount));
         mockMvc.perform(authenticated(multipart("/games/" + game.getId() + "/finish-turn").file(file),
                                       hostUserAccount));
 
@@ -350,5 +354,17 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         resultActions
                 .andExpect(status().is(200))
                 .andExpect(content().bytes(bytes));
+    }
+
+    private MockMultipartFile prepareFileAndStartGame(byte[] bytes) throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file",
+                                                       "test.txt",
+                                                       "text/plain",
+                                                       bytes);
+
+        // and
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"), hostUserAccount));
+        return file;
     }
 }
