@@ -20,13 +20,13 @@ import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
 public class CivilizationApplicationService {
 
     @PreAuthorize(HAS_ROLE_USER)
-    public List<CivilizationDTO> getAllCivilizations(){
+    public List<CivilizationDTO> getAllCivilizations() {
         return Arrays.stream(Civilization.values())
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    private CivilizationDTO convertToDTO(Civilization civilization){
+    private CivilizationDTO convertToDTO(Civilization civilization) {
         return CivilizationDTO.builder()
                 .code(civilization.toString())
                 .name(civilization.getName())

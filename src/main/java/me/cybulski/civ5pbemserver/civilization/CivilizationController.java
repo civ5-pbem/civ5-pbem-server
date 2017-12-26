@@ -20,7 +20,7 @@ class CivilizationController {
     private final CivilizationApplicationService civilizationApplicationService;
 
     @RequestMapping(path = "", method = RequestMethod.GET)
-    List<CivilizationDTO> listAllCivilizations(){
+    List<CivilizationDTO> listAllCivilizations() {
         return civilizationApplicationService.getAllCivilizations();
     }
 

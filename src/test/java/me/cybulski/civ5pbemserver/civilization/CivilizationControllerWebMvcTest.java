@@ -21,14 +21,14 @@ public class CivilizationControllerWebMvcTest extends WebMvcIntegrationTest{
     private UserAccount sampleUserAccount;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         // setting up a user
         sampleUserAccount = testUserAccountFactory.createNewUserAccount("sample@test.com", "sampleUser");
         testEntityManager.persistAndFlush(sampleUserAccount);
     }
 
     @Test
-    public void whenUserRequestsCivilizations_thenCivilizationsAreReturned() throws Exception{
+    public void whenUserRequestsCivilizations_thenCivilizationsAreReturned() throws Exception {
         // when
         ResultActions resultActions =
                 mockMvc.perform(authenticated(prepareGet("/civilizations"), sampleUserAccount));
