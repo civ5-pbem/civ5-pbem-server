@@ -6,8 +6,10 @@ import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
+import org.springframework.core.io.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class GamesController {
         return gameApplicationService.createNewGame(newGameInputDTO);
     }
 
-    @RequestMapping(path = "/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public List<GameOutputDTO> findAllGames() {
         return gameApplicationService.findAllGames();
     }
@@ -69,5 +71,16 @@ public class GamesController {
     @RequestMapping(path = "{gameId}/start", method = RequestMethod.POST)
     public GameOutputDTO startGame(@PathVariable String gameId) {
         return gameApplicationService.startGame(gameId);
+    }
+
+    @RequestMapping(path = "{gameId}/finish-turn", method = RequestMethod.POST)
+    public GameOutputDTO finishTurn(@PathVariable String gameId,
+                                    @RequestParam("file") MultipartFile multipartFile) {
+        return gameApplicationService.finishTurn(gameId, multipartFile);
+    }
+
+    @RequestMapping(path = "{gameId}/save-game", method = RequestMethod.GET)
+    public Resource getSaveGame(@PathVariable String gameId) {
+        return gameApplicationService.getSaveGameForTurn(gameId);
     }
 }

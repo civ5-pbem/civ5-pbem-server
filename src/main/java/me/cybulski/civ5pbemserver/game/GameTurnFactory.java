@@ -37,7 +37,7 @@ class GameTurnFactory {
     public GameTurn createNextTurn(GameTurn previousGameTurn, String saveFilename) {
         Game game = previousGameTurn.getGame();
         boolean isFirstMoveBeingFinished = GameState.WAITING_FOR_FIRST_MOVE.equals(game.getGameState())
-                && game.getCurrentGameTurn().getPreviousGameTurn() == null;
+                && previousGameTurn.getPreviousGameTurn() == null;
         Assert.state(GameState.IN_PROGRESS.equals(game.getGameState()) || isFirstMoveBeingFinished,
                      "Game must be in IN_PROGRESS or it must be first turn to add next turn");
 

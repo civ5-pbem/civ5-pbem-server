@@ -7,13 +7,16 @@ import me.cybulski.civ5pbemserver.game.dto.*;
 import me.cybulski.civ5pbemserver.game.exception.NoPermissionToModifyGameException;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
+import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
@@ -29,6 +32,7 @@ public class GameApplicationService {
     private final GameFactory gameFactory;
     private final GameRepository gameRepository;
     private final GameTurnFactory gameTurnFactory;
+    private final SaveGameRepository saveGameRepository;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
@@ -43,7 +47,7 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional(readOnly = true)
     public GameOutputDTO findGameById(String gameId) {
-        return convertToDTO(gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new));
+        return convertToDTO(findGameOrThrow(gameId));
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -55,9 +59,8 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO changePlayerType(String gameId, String playerId, ChangePlayerTypeInputDTO changePlayerTypeInputDTO) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUserAccount = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUserAccount = getCurrentUserOrThrow();
         Assert.state(currentUserAccount.equals(game.getHost()), "Only host can change this setting!");
 
         game.changePlayerType(playerId, changePlayerTypeInputDTO.getPlayerType());
@@ -68,9 +71,9 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO joinGame(String gameId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+
         game.joinGame(currentUser);
 
         return convertToDTO(game);
@@ -79,9 +82,8 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO chooseCivilization(String gameId, String playerId, ChooseCivilizationInputDTO chooseCivilizationInputDTO) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
         if (!checkCanModifyPlayer(game, playerId, currentUser)) {
             throw new NoPermissionToModifyGameException("Cannot modify player - no permission!");
         }
@@ -94,12 +96,12 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO kickPlayer(String gameId, String playerId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
         if (!game.getHost().equals(currentUser)) {
             throw new NoPermissionToModifyGameException("Cannot kick player - no permission!");
         }
+
         // FIXME #8
         // FIXME #9
         game.kickPlayer(playerId);
@@ -111,9 +113,9 @@ public class GameApplicationService {
     @Transactional
     public GameOutputDTO leaveGame(String gameId) {
         // FIXME #9
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+
         game.leave(currentUser);
 
         return convertToDTO(game);
@@ -122,16 +124,61 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO startGame(String gameId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
-        UserAccount currentUser = userAccountApplicationService.getCurrentUserAccount()
-                .orElseThrow(ResourceNotFoundException::new);
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+
         if (!game.getHost().equals(currentUser)) {
             throw new NoPermissionToModifyGameException("Only host can start the game!");
         }
+
         game.startGame();
         gameTurnFactory.createFirstGameTurn(game);
 
         return convertToDTO(game);
+    }
+
+    private UserAccount getCurrentUserOrThrow() {
+        return userAccountApplicationService.getCurrentUserAccount()
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO finishTurn(String gameId, MultipartFile multipartFile) {
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+        checkCurrentTurnOrThrow(game, currentUser);
+
+        GameTurn currentGameTurn = game.getCurrentGameTurn().get();
+        String savedFileName = saveGameRepository.saveFile(game, multipartFile);
+        gameTurnFactory.createNextTurn(currentGameTurn, savedFileName);
+        // FIXME #8
+
+        return convertToDTO(game);
+    }
+
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public Resource getSaveGameForTurn(String gameId) {
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+        checkCurrentTurnOrThrow(game, currentUser);
+
+        GameTurn gameTurn = game.getCurrentGameTurn().get();
+
+        return saveGameRepository.loadFile(gameTurn);
+    }
+
+    private void checkCurrentTurnOrThrow(Game game, UserAccount currentUser) {
+        Optional<GameTurn> currentGameTurnOptional = game.getCurrentGameTurn();
+        if (!currentGameTurnOptional.isPresent()
+                || !currentUser.equals(currentGameTurnOptional.get().getCurrentPlayer().getHumanUserAccount())) {
+            throw new NoPermissionToModifyGameException("This is not your turn!");
+        }
+    }
+
+    private Game findGameOrThrow(String gameId) {
+        return gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
     }
 
     private boolean checkCanModifyPlayer(Game game, String playerId, UserAccount userAccount) {

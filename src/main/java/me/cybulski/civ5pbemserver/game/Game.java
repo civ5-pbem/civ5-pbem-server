@@ -55,6 +55,7 @@ class Game extends BaseEntity {
     @Max(58)
     private Integer numberOfCityStates;
 
+    @Getter(AccessLevel.NONE)
     @OneToOne(cascade = CascadeType.ALL)
     private GameTurn currentGameTurn;
 
@@ -149,5 +150,9 @@ class Game extends BaseEntity {
             this.gameState = GameState.IN_PROGRESS;
         }
         this.currentGameTurn = nextTurn;
+    }
+
+    public Optional<GameTurn> getCurrentGameTurn() {
+        return Optional.ofNullable(currentGameTurn);
     }
 }
