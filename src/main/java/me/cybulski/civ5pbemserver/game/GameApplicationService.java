@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.dto.*;
 import me.cybulski.civ5pbemserver.game.exception.NoPermissionToModifyGameException;
+import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.core.io.Resource;
@@ -53,7 +54,10 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional(readOnly = true)
     public List<GameOutputDTO> findAllGames() {
-        return gameRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+        return gameRepository.findAll().stream()
+                .sorted(Comparator.comparing(BaseEntity::getCreatedAt))
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -206,6 +210,14 @@ public class GameApplicationService {
                                  .map(this::convertToDTO)
                                  .sorted(Comparator.comparingInt(PlayerOutputDTO::getPlayerNumber))
                                  .collect(Collectors.toList()))
+                .currentlyMovingPlayer(game.getCurrentGameTurn()
+                                               .map(GameTurn::getCurrentPlayer)
+                                               .map(Player::getHumanUserAccount)
+                                               .map(UserAccount::getUsername)
+                                               .orElse(null))
+                .lastMoveFinished(game.getCurrentGameTurn()
+                                          .map(GameTurn::getCreatedAt)
+                                          .orElse(null))
                 .build();
     }
 
