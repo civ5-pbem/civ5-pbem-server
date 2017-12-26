@@ -67,7 +67,7 @@ class Game extends BaseEntity {
     }
 
     void joinGame(UserAccount userAccount) {
-        // FIXME #9
+        checkIsGameWaitingForPlayers();
         if (getPlayerList().stream()
                 .map(Player::getHumanUserAccount)
                 .anyMatch(userAccount::equals)) {
@@ -84,7 +84,7 @@ class Game extends BaseEntity {
     }
 
     void changePlayerType(String playerId, PlayerType playerType) {
-        // FIXME #9
+        checkIsGameWaitingForPlayers();
         Player foundPlayer = findPlayer(playerId);
 
         switch (playerType) {
@@ -114,7 +114,7 @@ class Game extends BaseEntity {
     }
 
     void startGame() {
-        // FIXME #9
+        checkIsGameWaitingForPlayers();
         if (!checkAllHumanPlayersJoined()) {
             throw new CannotStartGameException("Not all human players joined!");
         }
@@ -124,10 +124,8 @@ class Game extends BaseEntity {
     }
 
     void chooseCivilization(String playerId, Civilization civilization) {
-        // FIXME #9
-        if (!GameState.WAITING_FOR_PLAYERS.equals(gameState)) {
-            throw new CannotModifyGameException("Civilizations can only be changed before start!");
-        }
+        checkIsGameWaitingForPlayers();
+
         Player player = findPlayer(playerId);
         player.chooseCivilization(civilization);
     }
@@ -139,10 +137,12 @@ class Game extends BaseEntity {
     }
 
     void kickPlayer(String playerId) {
+        checkIsGameWaitingForPlayers();
         findPlayer(playerId).kick();
     }
 
     void leave(UserAccount currentUser) {
+        checkIsGameWaitingForPlayers();
         findPlayer(currentUser).orElseThrow(ResourceNotFoundException::new).leave();
     }
 
@@ -155,5 +155,12 @@ class Game extends BaseEntity {
 
     public Optional<GameTurn> getCurrentGameTurn() {
         return Optional.ofNullable(currentGameTurn);
+    }
+
+
+    private void checkIsGameWaitingForPlayers() {
+        if (!GameState.WAITING_FOR_PLAYERS.equals(gameState)) {
+            throw new CannotModifyGameException("Cannot modify game after it has started");
+        }
     }
 }
