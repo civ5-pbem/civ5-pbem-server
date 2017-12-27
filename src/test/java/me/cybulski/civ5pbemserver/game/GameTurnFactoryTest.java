@@ -65,7 +65,7 @@ public class GameTurnFactoryTest {
 
         // and when
         String firstSaveFilename = "first-filename.civ5Save";
-        GameTurn secondTurn = subject.createNextTurn(firstGameTurn, firstSaveFilename);
+        GameTurn secondTurn = subject.createNextTurn(firstGameTurn, game.getPlayerList(), firstSaveFilename);
 
         // then
         assertThat(secondTurn.getCurrentPlayer()).isEqualTo(secondPlayer);
@@ -75,7 +75,7 @@ public class GameTurnFactoryTest {
 
         // and when
         String secondSaveFilename = "second-filename.civ5Save";
-        GameTurn thirdTurn = subject.createNextTurn(secondTurn, secondSaveFilename);
+        GameTurn thirdTurn = subject.createNextTurn(secondTurn, game.getPlayerList(), secondSaveFilename);
 
         // then
         assertThat(thirdTurn.getCurrentPlayer()).isEqualTo(firstPlayer);

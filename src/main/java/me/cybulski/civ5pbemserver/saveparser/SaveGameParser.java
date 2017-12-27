@@ -22,34 +22,35 @@ public class SaveGameParser {
     private static final int BLOCK_MARKER = 0x40000000;
 
     public SaveGameDTO parse(File file) throws IOException {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
-        List<Long> allBlocks = findAllBlocks(randomAccessFile);
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");) {
+            List<Long> allBlocks = findAllBlocks(randomAccessFile);
 
-        Assert.state(randomAccessFile.skipBytes(8) == 8, "Couldn't skip 8 bytes");
+            Assert.state(randomAccessFile.skipBytes(8) == 8, "Couldn't skip 8 bytes");
 
-        // game metadata
-        String gameVersion = readString(randomAccessFile);
-        readString(randomAccessFile);
-        int turnNumber = readInt(randomAccessFile);
+            // game metadata
+            String gameVersion = readString(randomAccessFile);
+            readString(randomAccessFile);
+            int turnNumber = readInt(randomAccessFile);
 
-        // player statuses
-        randomAccessFile.seek(allBlocks.get(2) + 4);
-        List<SaveGamePlayerDTO> players = readPlayerStatuses(randomAccessFile);
+            // player statuses
+            randomAccessFile.seek(allBlocks.get(2) + 4);
+            List<SaveGamePlayerDTO> players = readPlayerStatuses(randomAccessFile);
 
-        // player who moves
-        randomAccessFile.seek(allBlocks.get(8) - 16);
-        SaveGamePlayerDTO playerWhoMoves = players.get(readInt(randomAccessFile));
+            // player who moves
+            randomAccessFile.seek(allBlocks.get(8) - 16);
+            SaveGamePlayerDTO playerWhoMoves = players.get(readInt(randomAccessFile));
 
-        // player passwords
-        randomAccessFile.seek(allBlocks.get(11) + 4);
-        readPlayerPasswords(randomAccessFile, players);
+            // player passwords
+            randomAccessFile.seek(allBlocks.get(11) + 4);
+            readPlayerPasswords(randomAccessFile, players);
 
-        return SaveGameDTO.builder()
-                .gameVersion(gameVersion)
-                .turnNumber(turnNumber)
-                .playerWhoMoves(playerWhoMoves)
-                .players(players)
-                .build();
+            return SaveGameDTO.builder()
+                    .gameVersion(gameVersion)
+                    .turnNumber(turnNumber)
+                    .playerWhoMoves(playerWhoMoves)
+                    .players(players)
+                    .build();
+        }
     }
 
     private void readPlayerPasswords(RandomAccessFile randomAccessFile, List<SaveGamePlayerDTO> players) throws IOException {

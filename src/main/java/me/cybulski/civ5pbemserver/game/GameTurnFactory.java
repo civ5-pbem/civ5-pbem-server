@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -29,29 +30,22 @@ class GameTurnFactory {
                 .turnNumber(0)
                 .build();
         firstGameTurn = gameTurnRepository.save(firstGameTurn);
-        game.nextTurn(firstGameTurn);
 
         return firstGameTurn;
     }
 
-    public GameTurn createNextTurn(GameTurn previousGameTurn, String saveFilename) {
-        Game game = previousGameTurn.getGame();
-        boolean isFirstMoveBeingFinished = GameState.WAITING_FOR_FIRST_MOVE.equals(game.getGameState())
-                && previousGameTurn.getPreviousGameTurn() == null;
-        Assert.state(GameState.IN_PROGRESS.equals(game.getGameState()) || isFirstMoveBeingFinished,
-                     "Game must be in IN_PROGRESS or it must be first turn to add next turn");
-
-        Player nextHumanPlayer = game.getPlayerList().stream()
+    public GameTurn createNextTurn(GameTurn previousGameTurn, List<Player> players, String saveFilename) {
+        Player nextHumanPlayer = players.stream()
                 .filter(humanPlayerPredicate())
                 .filter(player -> player.getPlayerNumber() > previousGameTurn.getCurrentPlayer().getPlayerNumber())
                 .findFirst()
-                .orElseGet(() -> game.getPlayerList().stream()
+                .orElseGet(() -> players.stream()
                         .filter(humanPlayerPredicate())
                         .min(Comparator.comparingInt(Player::getPlayerNumber))
                         .orElseThrow(RuntimeException::new));
 
         GameTurn nextGameTurn = GameTurn.builder()
-                .game(game)
+                .game(previousGameTurn.getGame())
                 .currentPlayer(nextHumanPlayer)
                 .turnNumber(previousGameTurn.getCurrentPlayer().getPlayerNumber() >= nextHumanPlayer.getPlayerNumber()
                                     ? previousGameTurn.getTurnNumber() + 1
@@ -60,7 +54,6 @@ class GameTurnFactory {
                 .previousGameTurn(previousGameTurn)
                 .build();
         nextGameTurn = gameTurnRepository.save(nextGameTurn);
-        game.nextTurn(nextGameTurn);
 
         return nextGameTurn;
     }
