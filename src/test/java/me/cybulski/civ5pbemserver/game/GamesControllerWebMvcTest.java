@@ -70,7 +70,8 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.gameState").value(GameState.WAITING_FOR_PLAYERS.toString()))
                 .andExpect(jsonPath("$.host").value(hostUserAccount.getUsername()))
                 .andExpect(jsonPath("$.numberOfCityStates").value(mapSize.getDefaultNumberOfCityStates()))
-                .andExpect(jsonPath("$.mapSize").value(mapSize.toString()));
+                .andExpect(jsonPath("$.mapSize").value(mapSize.toString()))
+                .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(true));
     }
 
     @Test
@@ -380,5 +381,53 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
         mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/start"), hostUserAccount));
         return file;
+    }
+
+    @Test
+    public void whenHostDisablesSaveValidation_thenTheGameIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/disable-validation"),
+                                              hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(false));
+    }
+
+    @Test
+    public void whenHostDisablesSaveValidationButLaterSomeoneUploadsFile_thenTheGameIsReturned() throws Exception {
+        // given
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/disable-validation"),
+                                      hostUserAccount));
+
+        // and
+        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()
+                                                                                      + "/finish-turn")
+                                                                            .file(file),
+                                                                    hostUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(true));
+    }
+
+    @Test
+    public void whenNormalUserDisablesSaveValidation_thenErrorIsReturned() throws Exception {
+        // when
+        ResultActions resultActions =
+                mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/disable-validation"),
+                                              secondUserAccount));
+
+        // then
+        resultActions
+                .andExpect(status().is(403));
     }
 }

@@ -3,11 +3,15 @@ package me.cybulski.civ5pbemserver.game;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
-import me.cybulski.civ5pbemserver.game.dto.*;
+import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
+import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
+import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
+import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.game.exception.NoPermissionToModifyGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -15,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
@@ -34,6 +38,9 @@ public class GameApplicationService {
     private final GameRepository gameRepository;
     private final GameTurnFactory gameTurnFactory;
     private final SaveGameRepository saveGameRepository;
+    private final Converter<Game, GameOutputDTO> gameToGameDTOConverter;
+    private final CurrentGameTurnValidator currentGameTurnValidator;
+    private final SaveGameValidator saveGameValidator;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
@@ -42,13 +49,13 @@ public class GameApplicationService {
                 userAccountApplicationService.getCurrentUserAccount().orElseThrow(RuntimeException::new),
                 newGameInputDTO);
 
-        return convertToDTO(newGame);
+        return gameToGameDTOConverter.convert(newGame);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional(readOnly = true)
     public GameOutputDTO findGameById(String gameId) {
-        return convertToDTO(findGameOrThrow(gameId));
+        return gameToGameDTOConverter.convert(findGameOrThrow(gameId));
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -56,7 +63,7 @@ public class GameApplicationService {
     public List<GameOutputDTO> findAllGames() {
         return gameRepository.findAll().stream()
                 .sorted(Comparator.comparing(BaseEntity::getCreatedAt))
-                .map(this::convertToDTO)
+                .map(gameToGameDTOConverter::convert)
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +76,7 @@ public class GameApplicationService {
 
         game.changePlayerType(playerId, changePlayerTypeInputDTO.getPlayerType());
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -80,7 +87,7 @@ public class GameApplicationService {
 
         game.joinGame(currentUser);
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -94,7 +101,7 @@ public class GameApplicationService {
 
         game.chooseCivilization(playerId, chooseCivilizationInputDTO.getCivilization());
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -110,7 +117,7 @@ public class GameApplicationService {
         // FIXME #9
         game.kickPlayer(playerId);
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -122,7 +129,7 @@ public class GameApplicationService {
 
         game.leave(currentUser);
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -130,15 +137,15 @@ public class GameApplicationService {
     public GameOutputDTO startGame(String gameId) {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
-
         if (!game.getHost().equals(currentUser)) {
             throw new NoPermissionToModifyGameException("Only host can start the game!");
         }
 
         game.startGame();
-        gameTurnFactory.createFirstGameTurn(game);
+        GameTurn firstGameTurn = gameTurnFactory.createFirstGameTurn(game);
+        game.nextTurn(firstGameTurn);
 
-        return convertToDTO(game);
+        return gameToGameDTOConverter.convert(game);
     }
 
     private UserAccount getCurrentUserOrThrow() {
@@ -148,17 +155,23 @@ public class GameApplicationService {
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
-    public GameOutputDTO finishTurn(String gameId, MultipartFile multipartFile) {
+    public GameOutputDTO finishTurn(String gameId, MultipartFile multipartFile) throws IOException {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
-        checkCurrentTurnOrThrow(game, currentUser);
+        currentGameTurnValidator.checkCurrentTurnOrThrow(game, currentUser);
 
-        GameTurn currentGameTurn = game.getCurrentGameTurn().get();
+        boolean validateSaveGame = game.getShouldSaveGameFilesBeValidated();
+        GameTurn currentGameTurn = game.getCurrentGameTurn().orElseThrow(ResourceNotFoundException::new);
         String savedFileName = saveGameRepository.saveFile(game, multipartFile);
-        gameTurnFactory.createNextTurn(currentGameTurn, savedFileName);
+        GameTurn nextTurn = gameTurnFactory.createNextTurn(currentGameTurn, game.getPlayerList(), savedFileName);
+        game.nextTurn(nextTurn);
         // FIXME #8
 
-        return convertToDTO(game);
+        if (validateSaveGame) {
+            saveGameValidator.validate(nextTurn);
+        }
+
+        return gameToGameDTOConverter.convert(game);
     }
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -166,19 +179,11 @@ public class GameApplicationService {
     public Resource getSaveGameForTurn(String gameId) {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
-        checkCurrentTurnOrThrow(game, currentUser);
+        currentGameTurnValidator.checkCurrentTurnOrThrow(game, currentUser);
 
         GameTurn gameTurn = game.getCurrentGameTurn().get();
 
         return saveGameRepository.loadFile(gameTurn);
-    }
-
-    private void checkCurrentTurnOrThrow(Game game, UserAccount currentUser) {
-        Optional<GameTurn> currentGameTurnOptional = game.getCurrentGameTurn();
-        if (!currentGameTurnOptional.isPresent()
-                || !currentUser.equals(currentGameTurnOptional.get().getCurrentPlayer().getHumanUserAccount())) {
-            throw new NoPermissionToModifyGameException("This is not your turn!");
-        }
     }
 
     private Game findGameOrThrow(String gameId) {
@@ -195,41 +200,16 @@ public class GameApplicationService {
                 || userAccount.equals(foundPlayer.getHumanUserAccount());
     }
 
-    private GameOutputDTO convertToDTO(Game game) {
-        return GameOutputDTO
-                .builder()
-                .id(game.getId())
-                .name(game.getName())
-                .description(game.getDescription())
-                .gameState(game.getGameState())
-                .host(game.getHost().getUsername())
-                .mapSize(game.getMapSize())
-                .numberOfCityStates(game.getNumberOfCityStates())
-                .players(game.getPlayers()
-                                 .stream()
-                                 .map(this::convertToDTO)
-                                 .sorted(Comparator.comparingInt(PlayerOutputDTO::getPlayerNumber))
-                                 .collect(Collectors.toList()))
-                .currentlyMovingPlayer(game.getCurrentGameTurn()
-                                               .map(GameTurn::getCurrentPlayer)
-                                               .map(Player::getHumanUserAccount)
-                                               .map(UserAccount::getUsername)
-                                               .orElse(null))
-                .lastMoveFinished(game.getCurrentGameTurn()
-                                          .map(GameTurn::getCreatedAt)
-                                          .orElse(null))
-                .build();
-    }
+    public GameOutputDTO disableValidation(String gameId) {
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+        if (!game.getHost().equals(currentUser)) {
+            throw new NoPermissionToModifyGameException("Only host can start the game!");
+        }
+        game.disableValidation();
 
-    private PlayerOutputDTO convertToDTO(Player player) {
-        return PlayerOutputDTO.builder()
-                .id(player.getId())
-                .playerNumber(player.getPlayerNumber())
-                .civilization(player.getCivilization())
-                .humanUserAccount(player.getHumanUserAccount() != null
-                                          ? player.getHumanUserAccount().getUsername()
-                                          : null)
-                .playerType(player.getPlayerType())
-                .build();
+        // FIXME #8
+
+        return gameToGameDTOConverter.convert(game);
     }
 }

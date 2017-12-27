@@ -25,4 +25,5 @@ public class GameOutputDTO {
     private int numberOfCityStates;
     private String currentlyMovingPlayer;
     private Instant lastMoveFinished;
+    private Boolean isSaveGameValidationEnabled;
 }

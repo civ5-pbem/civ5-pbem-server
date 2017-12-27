@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -75,12 +76,18 @@ public class GamesController {
 
     @RequestMapping(path = "{gameId}/finish-turn", method = RequestMethod.POST)
     public GameOutputDTO finishTurn(@PathVariable String gameId,
-                                    @RequestParam("file") MultipartFile multipartFile) {
+                                    @RequestParam("file") MultipartFile multipartFile)
+            throws IOException {
         return gameApplicationService.finishTurn(gameId, multipartFile);
     }
 
     @RequestMapping(path = "{gameId}/save-game", method = RequestMethod.GET)
     public Resource getSaveGame(@PathVariable String gameId) {
         return gameApplicationService.getSaveGameForTurn(gameId);
+    }
+
+    @RequestMapping(path = "{gameId}/disable-validation", method = RequestMethod.POST)
+    public GameOutputDTO disableValidation(@PathVariable String gameId) {
+        return gameApplicationService.disableValidation(gameId);
     }
 }

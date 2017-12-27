@@ -30,6 +30,7 @@ class GameFactory {
                              .mapSize(mapSize)
                              .numberOfCityStates(mapSize.getDefaultNumberOfCityStates())
                              .players(new HashSet<>())
+                             .shouldSaveGameFilesBeValidated(true)
                              .build();
         newGame.getPlayers().addAll(playerFactory.createNewPlayers(host, newGame, maxNumberOfPlayers));
 

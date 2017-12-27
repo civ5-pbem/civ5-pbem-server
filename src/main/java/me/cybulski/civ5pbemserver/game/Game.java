@@ -8,6 +8,7 @@ import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;
 import me.cybulski.civ5pbemserver.game.exception.CannotStartGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.user.UserAccount;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -59,6 +60,11 @@ class Game extends BaseEntity {
     @Getter(AccessLevel.NONE)
     @OneToOne(cascade = CascadeType.ALL)
     private GameTurn currentGameTurn;
+
+    // FIXME #25 migrate db
+    @NotNull
+    @Getter(AccessLevel.PACKAGE)
+    private Boolean shouldSaveGameFilesBeValidated;
 
     public List<Player> getPlayerList() {
         return players.stream()
@@ -147,16 +153,24 @@ class Game extends BaseEntity {
     }
 
     void nextTurn(GameTurn nextTurn) {
+        boolean isFirstMoveBeingFinished = GameState.WAITING_FOR_FIRST_MOVE.equals(gameState);
+        Assert.state(GameState.IN_PROGRESS.equals(gameState) || isFirstMoveBeingFinished,
+                     "Game must be in IN_PROGRESS or it must be first turn to add next turn");
+
         if (this.currentGameTurn != null && GameState.WAITING_FOR_FIRST_MOVE.equals(this.gameState)) {
             this.gameState = GameState.IN_PROGRESS;
         }
         this.currentGameTurn = nextTurn;
+        shouldSaveGameFilesBeValidated = true;
+    }
+
+    void disableValidation() {
+        shouldSaveGameFilesBeValidated = false;
     }
 
     public Optional<GameTurn> getCurrentGameTurn() {
         return Optional.ofNullable(currentGameTurn);
     }
-
 
     private void checkIsGameWaitingForPlayers() {
         if (!GameState.WAITING_FOR_PLAYERS.equals(gameState)) {

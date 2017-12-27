@@ -545,3 +545,17 @@ databaseChangeLog:
         tableName: USER_ACCOUNT
         columnNames: USERNAME
         constraintName: UK_USER_ACCOUNT_USERNAME
+- changeSet:
+    id: 1514336921000-18
+    author: michal@cybulski.me
+    changes:
+    - addColumn:
+        tableName: GAME
+        columns:
+        - column:
+            name: SHOULD_SAVE_GAME_FILES_BE_VALIDATED
+            type: BOOLEAN(1)
+            valueBoolean: true
+            constraints:
+            - constraint:
+                nullable: false
