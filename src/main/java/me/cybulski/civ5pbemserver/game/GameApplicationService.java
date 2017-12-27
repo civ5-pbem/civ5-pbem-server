@@ -9,6 +9,7 @@ import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
 import me.cybulski.civ5pbemserver.game.exception.NoPermissionToModifyGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
+import me.cybulski.civ5pbemserver.mail.MailService;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.springframework.core.convert.converter.Converter;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static me.cybulski.civ5pbemserver.config.SecurityConstants.HAS_ROLE_USER;
@@ -41,6 +43,7 @@ public class GameApplicationService {
     private final Converter<Game, GameOutputDTO> gameToGameDTOConverter;
     private final CurrentGameTurnValidator currentGameTurnValidator;
     private final SaveGameValidator saveGameValidator;
+    private final MailService mailService;
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
@@ -113,9 +116,9 @@ public class GameApplicationService {
             throw new NoPermissionToModifyGameException("Cannot kick player - no permission!");
         }
 
-        // FIXME #8
-        // FIXME #9
+        UserAccount humanUserAccount = game.findPlayer(playerId).get().getHumanUserAccount();
         game.kickPlayer(playerId);
+        mailService.sendYouWereKickedEmail(humanUserAccount.getEmail(), game.getName());
 
         return gameToGameDTOConverter.convert(game);
     }
@@ -123,7 +126,6 @@ public class GameApplicationService {
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
     public GameOutputDTO leaveGame(String gameId) {
-        // FIXME #9
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
 
@@ -144,6 +146,8 @@ public class GameApplicationService {
         game.startGame();
         GameTurn firstGameTurn = gameTurnFactory.createFirstGameTurn(game);
         game.nextTurn(firstGameTurn);
+        Consumer<String> emailFunction = email -> mailService.sendGameJustStarted(email, game.getName());
+        sendEmailToAllHumanPlayers(game, emailFunction);
 
         return gameToGameDTOConverter.convert(game);
     }
@@ -165,11 +169,11 @@ public class GameApplicationService {
         String savedFileName = saveGameRepository.saveFile(game, multipartFile);
         GameTurn nextTurn = gameTurnFactory.createNextTurn(currentGameTurn, game.getPlayerList(), savedFileName);
         game.nextTurn(nextTurn);
-        // FIXME #8
 
         if (validateSaveGame) {
             saveGameValidator.validate(nextTurn);
         }
+        mailService.sendYourTurnEmail(nextTurn.getCurrentPlayer().getHumanUserAccount().getEmail(), game.getName());
 
         return gameToGameDTOConverter.convert(game);
     }
@@ -207,9 +211,18 @@ public class GameApplicationService {
             throw new NoPermissionToModifyGameException("Only host can start the game!");
         }
         game.disableValidation();
-
-        // FIXME #8
+        Consumer<String> emailFunction = email -> mailService.sendSaveGameValidationDisabledEmail(email, game.getName());
+        sendEmailToAllHumanPlayers(game, emailFunction);
 
         return gameToGameDTOConverter.convert(game);
+    }
+
+    private void sendEmailToAllHumanPlayers(Game game, Consumer<String> stringConsumer) {
+        game.getPlayerList().stream()
+                .filter(player -> PlayerType.HUMAN.equals(player.getPlayerType()))
+                .filter(player -> player.getHumanUserAccount() != null)
+                .map(Player::getHumanUserAccount)
+                .map(UserAccount::getEmail)
+                .forEach(stringConsumer);
     }
 }

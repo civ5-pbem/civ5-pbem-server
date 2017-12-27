@@ -61,7 +61,6 @@ class Game extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     private GameTurn currentGameTurn;
 
-    // FIXME #25 migrate db
     @NotNull
     @Getter(AccessLevel.PACKAGE)
     private Boolean shouldSaveGameFilesBeValidated;
@@ -91,7 +90,8 @@ class Game extends BaseEntity {
 
     void changePlayerType(String playerId, PlayerType playerType) {
         checkIsGameWaitingForPlayers();
-        Player foundPlayer = findPlayer(playerId);
+        Player foundPlayer = findPlayer(playerId)
+                .orElseThrow(ResourceNotFoundException::new);
 
         switch (playerType) {
             case HUMAN:
@@ -106,11 +106,10 @@ class Game extends BaseEntity {
         }
     }
 
-    private Player findPlayer(String playerId) {
+    Optional<Player> findPlayer(String playerId) {
         return getPlayers().stream()
                 .filter(player -> player.getId().equals(playerId))
-                .findFirst()
-                .orElseThrow(ResourceNotFoundException::new);
+                .findFirst();
     }
 
     Optional<Player> findPlayer(UserAccount userAccount) {
@@ -125,14 +124,14 @@ class Game extends BaseEntity {
             throw new CannotStartGameException("Not all human players joined!");
         }
 
-        // FIXME #8 send email to host?
         this.gameState = GameState.WAITING_FOR_FIRST_MOVE;
     }
 
     void chooseCivilization(String playerId, Civilization civilization) {
         checkIsGameWaitingForPlayers();
 
-        Player player = findPlayer(playerId);
+        Player player = findPlayer(playerId)
+                .orElseThrow(ResourceNotFoundException::new);
         player.chooseCivilization(civilization);
     }
 
@@ -144,7 +143,9 @@ class Game extends BaseEntity {
 
     void kickPlayer(String playerId) {
         checkIsGameWaitingForPlayers();
-        findPlayer(playerId).kick();
+        findPlayer(playerId)
+                .orElseThrow(ResourceNotFoundException::new)
+                .kick();
     }
 
     void leave(UserAccount currentUser) {

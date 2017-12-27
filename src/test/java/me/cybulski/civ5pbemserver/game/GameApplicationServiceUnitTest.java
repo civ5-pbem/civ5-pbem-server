@@ -1,6 +1,7 @@
 package me.cybulski.civ5pbemserver.game;
 
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
+import me.cybulski.civ5pbemserver.mail.MailService;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
 import org.junit.Before;
@@ -54,6 +55,8 @@ public class GameApplicationServiceUnitTest {
     private UserAccount currentUserAccount;
     @Mock
     private MultipartFile multipartFile;
+    @Mock
+    private MailService mailService;
 
     private String gameId = UUID.randomUUID().toString();
 
@@ -67,7 +70,8 @@ public class GameApplicationServiceUnitTest {
                 saveGameRepository,
                 gameOutputDTOConverter,
                 currentGameTurnValidator,
-                saveGameValidator);
+                saveGameValidator,
+                mailService);
     }
 
     @Test

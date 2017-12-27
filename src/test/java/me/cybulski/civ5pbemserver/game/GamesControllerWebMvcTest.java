@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -241,7 +242,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     @Test
     public void whenHostKicksPlayerOut_thenTheGameIsReturned() throws Exception {
         // given
-        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), hostUserAccount));
+        mockMvc.perform(authenticated(preparePost("/games/" + game.getId() + "/join"), secondUserAccount));
 
         // when
         ResultActions resultActions =
@@ -254,6 +255,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(game.getId()))
                 .andExpect(jsonPath("$.players.[1].humanUserAccount").isEmpty());
+
+        // and
+        verify(mailService).sendYouWereKickedEmail(secondUserAccount.getEmail(), game.getName());
     }
 
     @Test
@@ -302,6 +306,10 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.gameState").value(WAITING_FOR_FIRST_MOVE.toString()))
                 .andExpect(jsonPath("$.currentlyMovingPlayer").value(hostUserAccount.getUsername()))
                 .andExpect(jsonPath("$.lastMoveFinished").value(new TimestampStringMatcher()));
+
+        // and
+        verify(mailService).sendGameJustStarted(hostUserAccount.getEmail(), game.getName());
+        verify(mailService).sendGameJustStarted(secondUserAccount.getEmail(), game.getName());
     }
 
     @Test
@@ -334,6 +342,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         resultActions
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(game.getId()));
+
+        // and
+        verify(mailService).sendYourTurnEmail(secondUserAccount.getEmail(), game.getName());
     }
 
     @Test
@@ -395,6 +406,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.id").value(game.getId()))
                 .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(false));
+
+        // and
+        verify(mailService).sendSaveGameValidationDisabledEmail(hostUserAccount.getEmail(), game.getName());
     }
 
     @Test

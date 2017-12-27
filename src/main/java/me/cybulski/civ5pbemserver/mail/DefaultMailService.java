@@ -19,17 +19,58 @@ public class DefaultMailService implements MailService {
 
     @Override
     public void sendRegistrationConfirmationEmail(String emailAddress, String accessToken) {
-        mailSender.send(prepareRegistrationMailMessage(emailAddress, accessToken));
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Civ 5 play by email registration confirmation",
+                "Hello,\n\n" +
+                        "your access token: " + accessToken + "\n" +
+                        "If you didn't request it, then just please ignore this message.\n"));
     }
 
-    protected SimpleMailMessage prepareRegistrationMailMessage(String emailAddress, String accessToken) {
+    @Override
+    public void sendSaveGameValidationDisabledEmail(String emailAddress, String gameName) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Host just disabled save game validation for a hot-seat meeting",
+                "Hello,\n\n" +
+                        "host of the game " + gameName + " just disabled save game validations for one turn.\n" +
+                        "If this was not agreed upon, then please take action to resolve the issue with the host.\n"));
+    }
+
+    @Override
+    public void sendYourTurnEmail(String emailAddress, String gameName) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Game is waiting for your turn",
+                "Hello,\n\n" +
+                        "it's now your turn in the game: " + gameName + ".\n"));
+    }
+
+    @Override
+    public void sendYouWereKickedEmail(String emailAddress, String gameName) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Host just kicked you out of the game",
+                "Hello,\n\n" +
+                        "host of the game " + gameName + " just kicked you from it.\n"));
+    }
+
+    @Override
+    public void sendGameJustStarted(String emailAddress, String gameName) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Game just started",
+                "Hello,\n\n" +
+                        "host of the game " + gameName + " just started the game.\n" +
+                        "You will be notified when it's your turn.\n"));
+    }
+
+    protected SimpleMailMessage prepareMail(String emailAddress, String subject, String mailContent) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(emailAddress);
         simpleMailMessage.setFrom(environment.getProperty("civ5.mail.from"));
-        simpleMailMessage.setSubject("Civ 5 play by email registration confirmation");
-        simpleMailMessage.setText("Hello,\n\n" +
-                                          "your access token: " + accessToken + "\n" +
-                                          "If you didn't request it, then just please ignore this message.\n");
+        simpleMailMessage.setSubject(subject);
+        simpleMailMessage.setText(mailContent);
         return simpleMailMessage;
     }
 }
