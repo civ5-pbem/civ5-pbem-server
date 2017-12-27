@@ -85,4 +85,9 @@ public class GamesController {
     public Resource getSaveGame(@PathVariable String gameId) {
         return gameApplicationService.getSaveGameForTurn(gameId);
     }
+
+    @RequestMapping(path = "{gameId}/disable-validation", method = RequestMethod.POST)
+    public GameOutputDTO disableValidation(@PathVariable String gameId) {
+        return gameApplicationService.disableValidation(gameId);
+    }
 }

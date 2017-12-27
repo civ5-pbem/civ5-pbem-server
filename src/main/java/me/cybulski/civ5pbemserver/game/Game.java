@@ -161,12 +161,16 @@ class Game extends BaseEntity {
             this.gameState = GameState.IN_PROGRESS;
         }
         this.currentGameTurn = nextTurn;
+        shouldSaveGameFilesBeValidated = true;
+    }
+
+    void disableValidation() {
+        shouldSaveGameFilesBeValidated = false;
     }
 
     public Optional<GameTurn> getCurrentGameTurn() {
         return Optional.ofNullable(currentGameTurn);
     }
-
 
     private void checkIsGameWaitingForPlayers() {
         if (!GameState.WAITING_FOR_PLAYERS.equals(gameState)) {

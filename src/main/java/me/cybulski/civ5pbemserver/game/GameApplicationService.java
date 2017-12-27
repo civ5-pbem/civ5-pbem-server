@@ -63,7 +63,7 @@ public class GameApplicationService {
     public List<GameOutputDTO> findAllGames() {
         return gameRepository.findAll().stream()
                 .sorted(Comparator.comparing(BaseEntity::getCreatedAt))
-                .map(this::convertToDTO)
+                .map(gameToGameDTOConverter::convert)
                 .collect(Collectors.toList());
     }
 
@@ -137,7 +137,6 @@ public class GameApplicationService {
     public GameOutputDTO startGame(String gameId) {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
-
         if (!game.getHost().equals(currentUser)) {
             throw new NoPermissionToModifyGameException("Only host can start the game!");
         }
@@ -201,7 +200,16 @@ public class GameApplicationService {
                 || userAccount.equals(foundPlayer.getHumanUserAccount());
     }
 
-    private GameOutputDTO convertToDTO(Game game) {
+    public GameOutputDTO disableValidation(String gameId) {
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+        if (!game.getHost().equals(currentUser)) {
+            throw new NoPermissionToModifyGameException("Only host can start the game!");
+        }
+        game.disableValidation();
+
+        // FIXME #8
+
         return gameToGameDTOConverter.convert(game);
     }
 }
