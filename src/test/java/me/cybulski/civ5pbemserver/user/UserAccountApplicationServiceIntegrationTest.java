@@ -1,11 +1,9 @@
 package me.cybulski.civ5pbemserver.user;
 
 import me.cybulski.civ5pbemserver.IntegrationTest;
-import me.cybulski.civ5pbemserver.mail.MailService;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.Optional;
 
@@ -22,9 +20,6 @@ public class UserAccountApplicationServiceIntegrationTest extends IntegrationTes
 
     @Autowired
     private UserAccountRepository userAccountRepository;
-
-    @SpyBean
-    private MailService spyMailService;
 
     @Test
     public void registerUserAccountWorks() throws Exception {
@@ -43,6 +38,6 @@ public class UserAccountApplicationServiceIntegrationTest extends IntegrationTes
         assertThat(newUserAccount.map(UserAccount::isRegistrationConfirmed)).contains(false);
 
         // and
-        verify(spyMailService).sendRegistrationConfirmationEmail(email, newUserAccount.get().getCurrentAccessToken());
+        verify(mailService).sendRegistrationConfirmationEmail(email, newUserAccount.get().getCurrentAccessToken());
     }
 }
