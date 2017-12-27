@@ -128,6 +128,14 @@ public class GameApplicationServiceUnitTest {
         when(game.getPlayerList()).thenReturn(playerList);
         when(gameTurnFactory.createNextTurn(currentGameTurn, playerList, saveFileName)).thenReturn(nextTurn);
 
+        // and
+        Player currentPlayer = mock(Player.class);
+        when(nextTurn.getCurrentPlayer()).thenReturn(currentPlayer);
+        UserAccount userAccount = mock(UserAccount.class);
+        when(currentPlayer.getHumanUserAccount()).thenReturn(userAccount);
+        when(userAccount.getEmail()).thenReturn("email@test.com");
+        when(game.getName()).thenReturn("Game name!");
+
         return nextTurn;
     }
 }
