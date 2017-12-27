@@ -40,8 +40,8 @@ public class SaveGameRepository {
         return filename;
     }
 
-    public Resource loadFile(GameTurn gameTurn) {
-        return new FileSystemResource(createFile(getGameDirectory(gameTurn.getGame()), gameTurn.getSaveFilename()));
+    public Resource loadFile(Game game, String saveFilename) {
+        return new FileSystemResource(createFile(getGameDirectory(game), saveFilename));
     }
 
     private File createFile(File gameRootDir, String fileName) {

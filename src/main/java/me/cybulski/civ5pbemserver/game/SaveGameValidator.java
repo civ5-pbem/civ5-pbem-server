@@ -2,6 +2,7 @@ package me.cybulski.civ5pbemserver.game;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
 import me.cybulski.civ5pbemserver.game.exception.InvalidSaveGameException;
 import me.cybulski.civ5pbemserver.saveparser.SaveGameDTO;
 import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
@@ -20,8 +21,9 @@ public class SaveGameValidator {
     private final SaveGameRepository saveGameRepository;
     private final SaveGameParser saveGameParser;
 
-    public void validate(GameTurn gameTurn) throws IOException {
-        File file = saveGameRepository.loadFile(gameTurn).getFile();
+    public void validateCurrentSaveFile(Game game) throws IOException {
+        GameTurn gameTurn = game.getCurrentGameTurn().orElseThrow(ResourceNotFoundException::new);
+        File file = saveGameRepository.loadFile(game, gameTurn.getSaveFilename()).getFile();
         SaveGameDTO parsedData = saveGameParser.parse(file);
 
         int calculatedPlayerNumber = gameTurn.getCurrentPlayer().getPlayerNumber();

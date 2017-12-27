@@ -1,6 +1,7 @@
 package me.cybulski.civ5pbemserver.game;
 
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.game.exception.CannotModifyGameException;
 import me.cybulski.civ5pbemserver.jpa.BaseEntity;
@@ -19,6 +20,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Slf4j
 class Player extends BaseEntity {
 
     @NotNull
@@ -53,11 +55,11 @@ class Player extends BaseEntity {
         if (humanUserAccount != null) {
             throw new CannotModifyGameException("Cannot change player with human player joined! Kick player first.");
         }
-        Assert.state(PlayerType.HUMAN.equals(playerType), "Cannot join - the playerType is not HUMAN: " + playerType);
         this.playerType = PlayerType.CLOSED;
     }
 
     void joinHuman(UserAccount newPlayer) {
+        Assert.state(PlayerType.HUMAN.equals(playerType), "Cannot join - the playerType is not HUMAN: " + playerType);
         this.humanUserAccount = newPlayer;
     }
 
@@ -71,5 +73,12 @@ class Player extends BaseEntity {
 
     public void leave() {
         this.humanUserAccount = null;
+    }
+
+    public void die() {
+        if (!PlayerType.DEAD.equals(playerType)) {
+            log.info("Player {} for game {} just died");
+            this.playerType = PlayerType.DEAD;
+        }
     }
 }

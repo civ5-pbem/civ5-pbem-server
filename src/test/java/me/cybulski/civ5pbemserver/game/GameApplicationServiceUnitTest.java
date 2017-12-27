@@ -90,7 +90,7 @@ public class GameApplicationServiceUnitTest {
         verify(game).nextTurn(nextTurn);
 
         // and
-        verify(saveGameValidator).validate(nextTurn);
+        verify(saveGameValidator).validateCurrentSaveFile(nextTurn);
     }
 
     @Test

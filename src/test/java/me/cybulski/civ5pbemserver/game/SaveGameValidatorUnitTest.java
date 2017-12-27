@@ -69,7 +69,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGameDTO.getTurnNumber()).thenReturn(turnNumber);
 
         // when
-        subject.validate(gameTurn);
+        subject.validateCurrentSaveFile(gameTurn);
 
         // then no exception is thrown
     }
@@ -86,7 +86,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGamePlayerDTO.getPlayerNumber()).thenReturn(playerNumber);
 
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validate(gameTurn);
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(gameTurn);
 
         // then
         assertThatThrownBy(throwingCallable).isInstanceOf(InvalidSaveGameException.class);
@@ -109,7 +109,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGameDTO.getTurnNumber()).thenReturn(turnNumber);
 
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validate(gameTurn);
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(gameTurn);
 
         // then
         assertThatThrownBy(throwingCallable).isInstanceOf(InvalidSaveGameException.class);
