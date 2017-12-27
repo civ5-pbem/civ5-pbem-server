@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 @Component
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-class SaveGameValidator {
+public class SaveGameValidator {
 
     private final SaveGameRepository saveGameRepository;
     private final SaveGameParser saveGameParser;
