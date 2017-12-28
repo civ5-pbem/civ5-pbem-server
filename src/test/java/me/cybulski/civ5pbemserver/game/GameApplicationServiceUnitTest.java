@@ -46,6 +46,10 @@ public class GameApplicationServiceUnitTest {
     private CurrentGameTurnValidator currentGameTurnValidator;
     @Mock
     private SaveGameValidator saveGameValidator;
+    @Mock
+    private SaveGameSynchronizer saveGameSynchronizer;
+    @Mock
+    private MailService mailService;
 
     private GameApplicationService subject;
 
@@ -55,8 +59,6 @@ public class GameApplicationServiceUnitTest {
     private UserAccount currentUserAccount;
     @Mock
     private MultipartFile multipartFile;
-    @Mock
-    private MailService mailService;
 
     private String gameId = UUID.randomUUID().toString();
 
@@ -71,6 +73,7 @@ public class GameApplicationServiceUnitTest {
                 gameOutputDTOConverter,
                 currentGameTurnValidator,
                 saveGameValidator,
+                saveGameSynchronizer,
                 mailService);
     }
 
@@ -90,7 +93,7 @@ public class GameApplicationServiceUnitTest {
         verify(game).nextTurn(nextTurn);
 
         // and
-        verify(saveGameValidator).validateCurrentSaveFile(nextTurn);
+        verify(saveGameValidator).validateCurrentSaveFile(game);
     }
 
     @Test

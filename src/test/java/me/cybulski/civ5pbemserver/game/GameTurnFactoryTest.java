@@ -44,7 +44,7 @@ public class GameTurnFactoryTest {
         UserAccount secondUser = testUserAccountFactory.createNewUserAccount("second@test.com", "secondUser");
 
         // and
-        Game game = new TestGameFactory(gameRepository).createNewTestGame(host, MapSize.TINY);
+        Game game = new TestGameCreator(gameRepository).createNewTestGame(host, MapSize.TINY);
         game.getPlayerList().get(2).changeToAi();
         game.getPlayerList().get(3).changeToAi();
         game.joinGame(secondUser);

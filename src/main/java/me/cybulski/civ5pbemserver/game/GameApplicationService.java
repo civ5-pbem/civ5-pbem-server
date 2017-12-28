@@ -169,7 +169,6 @@ public class GameApplicationService {
         GameTurn currentGameTurn = game.getCurrentGameTurn().orElseThrow(ResourceNotFoundException::new);
         String savedFileName = saveGameRepository.saveFile(game, multipartFile);
 
-        // FIXME #13 sync dead players
         saveGameSynchronizer.synchronizeDeadPlayers(game, savedFileName);
 
         GameTurn nextTurn = gameTurnFactory.createNextTurn(currentGameTurn, game.getPlayerList(), savedFileName);

@@ -32,12 +32,12 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     private UserAccount hostUserAccount;
     private UserAccount secondUserAccount;
     private MapSize mapSize;
-    private TestGameFactory testGameFactory;
+    private TestGameCreator testGameCreator;
 
     @Before
     public void setUp() {
         // setting up dependencies
-        testGameFactory = new TestGameFactory(gameRepository);
+        testGameCreator = new TestGameCreator(gameRepository);
 
         // setting up the users
         hostUserAccount = testUserAccountFactory.createNewUserAccount("host@test.com", "hostUser");
@@ -47,7 +47,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
 
         // setting up the game
         mapSize = MapSize.DUEL;
-        game = testGameFactory.createNewTestGame(hostUserAccount, mapSize);
+        game = testGameCreator.createNewTestGame(hostUserAccount, mapSize);
         testEntityManager.persistAndFlush(game);
     }
 
@@ -98,9 +98,9 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     @Test
     public void whenFindAllGamesIsInvoked_thenAllGamesAreReturned() throws Exception {
         // given
-        Game secondGame = testGameFactory.createNewTestGame(hostUserAccount);
+        Game secondGame = testGameCreator.createNewTestGame(hostUserAccount);
         testEntityManager.persistAndFlush(secondGame);
-        Game thirdGame = testGameFactory.createNewTestGame(hostUserAccount);
+        Game thirdGame = testGameCreator.createNewTestGame(hostUserAccount);
         testEntityManager.persistAndFlush(thirdGame);
 
         // when
@@ -418,7 +418,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                                       hostUserAccount));
 
         // and
-        MockMultipartFile file = prepareFileAndStartGame("Spring Framework".getBytes());
+        MockMultipartFile file = prepareFileAndStartGame("Save game contents".getBytes());
 
         // when
         ResultActions resultActions = mockMvc.perform(authenticated(multipart("/games/" + game.getId()

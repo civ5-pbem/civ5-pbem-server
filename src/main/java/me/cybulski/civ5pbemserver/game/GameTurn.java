@@ -32,4 +32,9 @@ class GameTurn extends BaseEntity {
     private GameTurn previousGameTurn;
 
     private String saveFilename;
+
+    void syncrhonizeWithSaveGame(int turnNumber, @NonNull Player currentPlayer) {
+        this.turnNumber = turnNumber;
+        this.currentPlayer = currentPlayer;
+    }
 }

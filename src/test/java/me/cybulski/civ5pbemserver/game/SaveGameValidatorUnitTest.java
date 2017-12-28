@@ -15,6 +15,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +40,8 @@ public class SaveGameValidatorUnitTest {
     @Mock
     private SaveGameDTO saveGameDTO;
     @Mock
+    private Game game;
+    @Mock
     private GameTurn gameTurn;
 
     @Before
@@ -48,7 +51,10 @@ public class SaveGameValidatorUnitTest {
                 saveGameParser);
 
         Resource mockResource = mock(Resource.class);
-        when(saveGameRepository.loadFile(gameTurn)).thenReturn(mockResource);
+        when(game.getCurrentGameTurn()).thenReturn(Optional.of(gameTurn));
+        String saveGameFilename = "someFileName";
+        when(gameTurn.getSaveFilename()).thenReturn(saveGameFilename);
+        when(saveGameRepository.loadFile(game, saveGameFilename)).thenReturn(mockResource);
         when(saveGameParser.parse(any())).thenReturn(saveGameDTO);
     }
 
@@ -69,7 +75,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGameDTO.getTurnNumber()).thenReturn(turnNumber);
 
         // when
-        subject.validateCurrentSaveFile(gameTurn);
+        subject.validateCurrentSaveFile(game);
 
         // then no exception is thrown
     }
@@ -86,7 +92,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGamePlayerDTO.getPlayerNumber()).thenReturn(playerNumber);
 
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(gameTurn);
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(game);
 
         // then
         assertThatThrownBy(throwingCallable).isInstanceOf(InvalidSaveGameException.class);
@@ -109,7 +115,7 @@ public class SaveGameValidatorUnitTest {
         when(saveGameDTO.getTurnNumber()).thenReturn(turnNumber);
 
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(gameTurn);
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.validateCurrentSaveFile(game);
 
         // then
         assertThatThrownBy(throwingCallable).isInstanceOf(InvalidSaveGameException.class);

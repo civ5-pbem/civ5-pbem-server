@@ -12,17 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ChangeCivilizationGameTest extends BaseGameTest {
 
-    private TestGameFactory testGameFactory;
+    private TestGameCreator testGameCreator;
 
     @Before
     public void setUp() {
-        testGameFactory = new TestGameFactory(gameRepository);
+        testGameCreator = new TestGameCreator(gameRepository);
     }
 
     @Test
     public void whenCivilizationIsChanged_thenChangesAreVisible() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount);
         Player hostPlayer = subject.findPlayer(hostUserAccount).orElseThrow(ResourceNotFoundException::new);
 
         // and
@@ -38,7 +38,7 @@ public class ChangeCivilizationGameTest extends BaseGameTest {
     @Test
     public void whenHostChangesAiCivilization_thenChangesAreVisible() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount);
         Player aiPlayer = subject.getPlayerList().get(1);
         aiPlayer.changeToAi();
 
