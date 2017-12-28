@@ -43,6 +43,7 @@ public class GameApplicationService {
     private final Converter<Game, GameOutputDTO> gameToGameDTOConverter;
     private final CurrentGameTurnValidator currentGameTurnValidator;
     private final SaveGameValidator saveGameValidator;
+    private final SaveGameSynchronizer saveGameSynchronizer;
     private final MailService mailService;
 
     @PreAuthorize(HAS_ROLE_USER)
@@ -167,11 +168,16 @@ public class GameApplicationService {
         boolean validateSaveGame = game.getShouldSaveGameFilesBeValidated();
         GameTurn currentGameTurn = game.getCurrentGameTurn().orElseThrow(ResourceNotFoundException::new);
         String savedFileName = saveGameRepository.saveFile(game, multipartFile);
+
+        saveGameSynchronizer.synchronizeDeadPlayers(game, savedFileName);
+
         GameTurn nextTurn = gameTurnFactory.createNextTurn(currentGameTurn, game.getPlayerList(), savedFileName);
         game.nextTurn(nextTurn);
 
         if (validateSaveGame) {
-            saveGameValidator.validate(nextTurn);
+            saveGameValidator.validateCurrentSaveFile(game);
+        } else {
+            saveGameSynchronizer.synchronizeTurnNumberAndCurrentPlayer(game, savedFileName);
         }
         mailService.sendYourTurnEmail(nextTurn.getCurrentPlayer().getHumanUserAccount().getEmail(), game.getName());
 
@@ -187,7 +193,7 @@ public class GameApplicationService {
 
         GameTurn gameTurn = game.getCurrentGameTurn().get();
 
-        return saveGameRepository.loadFile(gameTurn);
+        return saveGameRepository.loadFile(game, gameTurn.getSaveFilename());
     }
 
     private Game findGameOrThrow(String gameId) {

@@ -1,5 +1,6 @@
 package me.cybulski.civ5pbemserver;
 
+import me.cybulski.civ5pbemserver.game.SaveGameSynchronizer;
 import me.cybulski.civ5pbemserver.game.SaveGameValidator;
 import me.cybulski.civ5pbemserver.mail.MailService;
 import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
@@ -35,6 +36,8 @@ public abstract class IntegrationTest {
     protected SaveGameParser saveGameParser;
     @MockBean
     protected SaveGameValidator saveGameValidator;
+    @MockBean
+    protected SaveGameSynchronizer saveGameSynchronizer;
 
     @SpyBean
     protected MailService mailService;

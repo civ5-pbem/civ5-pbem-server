@@ -22,15 +22,15 @@ public class GameStartTest extends BaseGameTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
 
-    private TestGameFactory testGameFactory;
+    private TestGameCreator testGameCreator;
     private UserAccount hostUserAccount;
     private Game subject;
 
     @Before
     public void setUp() {
-        testGameFactory = new TestGameFactory(gameRepository);
+        testGameCreator = new TestGameCreator(gameRepository);
         hostUserAccount = new TestUserAccountFactory().createNewUserAccount("host@test.com", "hostUser");
-        subject = testGameFactory.createNewTestGame(hostUserAccount, MapSize.DUEL);
+        subject = testGameCreator.createNewTestGame(hostUserAccount, MapSize.DUEL);
     }
 
     @Test

@@ -15,17 +15,17 @@ import static org.mockito.Mockito.mock;
  */
 public class GameJoinTest extends BaseGameTest {
 
-    private TestGameFactory testGameFactory;
+    private TestGameCreator testGameCreator;
 
     @Before
     public void setUp() {
-        testGameFactory = new TestGameFactory(gameRepository);
+        testGameCreator = new TestGameCreator(gameRepository);
     }
 
     @Test
     public void whenNewGameIsCreated_thenHostIsFirstPlayer() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount);
 
         // expect
         assertThat(subject.getPlayers().stream()
@@ -38,7 +38,7 @@ public class GameJoinTest extends BaseGameTest {
     @Test
     public void whenUserIsAlreadyJoined_thenPlayerCannotJoinAgain() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount);
 
         // when
         ThrowableAssert.ThrowingCallable throwingCallable = () -> subject.joinGame(hostUserAccount);
@@ -50,7 +50,7 @@ public class GameJoinTest extends BaseGameTest {
     @Test
     public void whenUserAccountTriesToJoinAndThereIsPlace_thenPlayerJoins() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount);
 
         // and
         UserAccount anotherUserAccount = mock(UserAccount.class);
@@ -69,7 +69,7 @@ public class GameJoinTest extends BaseGameTest {
     @Test
     public void whenUserAccountTriesToJoinAndThereIsNoPlace_thenExceptionIsThrown() {
         // given
-        Game subject = testGameFactory.createNewTestGame(hostUserAccount, MapSize.DUEL);
+        Game subject = testGameCreator.createNewTestGame(hostUserAccount, MapSize.DUEL);
         Player emptyPlayer = subject.getPlayers().stream()
                 .filter(player -> player.getHumanUserAccount() == null)
                 .findFirst()

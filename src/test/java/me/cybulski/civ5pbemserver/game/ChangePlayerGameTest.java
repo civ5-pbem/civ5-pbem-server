@@ -18,7 +18,7 @@ public class ChangePlayerGameTest extends BaseGameTest {
 
     @Before
     public void setUp() {
-        subject = new TestGameFactory(gameRepository).createNewTestGame(hostUserAccount);
+        subject = new TestGameCreator(gameRepository).createNewTestGame(hostUserAccount);
     }
 
     @Test

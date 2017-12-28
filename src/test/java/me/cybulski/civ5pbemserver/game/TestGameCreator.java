@@ -6,11 +6,11 @@ import me.cybulski.civ5pbemserver.user.UserAccount;
 /**
  * @author Michał Cybulski
  */
-public class TestGameFactory {
+public class TestGameCreator {
 
     private GameFactory gameFactory;
 
-    public TestGameFactory(GameRepository gameRepository) {
+    public TestGameCreator(GameRepository gameRepository) {
         PlayerFactory playerFactory = new PlayerFactory();
         this.gameFactory = new GameFactory(gameRepository, playerFactory);
     }

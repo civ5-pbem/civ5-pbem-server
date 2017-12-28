@@ -6,5 +6,6 @@ package me.cybulski.civ5pbemserver.game;
 public enum PlayerType {
     HUMAN,
     AI,
-    CLOSED;
+    CLOSED,
+    DEAD;
 }

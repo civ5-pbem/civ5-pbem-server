@@ -22,7 +22,7 @@ public class SaveGameParser {
     private static final int BLOCK_MARKER = 0x40000000;
 
     public SaveGameDTO parse(File file) throws IOException {
-        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");) {
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             List<Long> allBlocks = findAllBlocks(randomAccessFile);
 
             Assert.state(randomAccessFile.skipBytes(8) == 8, "Couldn't skip 8 bytes");
