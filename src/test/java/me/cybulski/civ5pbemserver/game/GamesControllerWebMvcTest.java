@@ -72,7 +72,8 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
                 .andExpect(jsonPath("$.host").value(hostUserAccount.getUsername()))
                 .andExpect(jsonPath("$.numberOfCityStates").value(mapSize.getDefaultNumberOfCityStates()))
                 .andExpect(jsonPath("$.mapSize").value(mapSize.toString()))
-                .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(true));
+                .andExpect(jsonPath("$.isSaveGameValidationEnabled").value(true))
+                .andExpect(jsonPath("$.turnNumber").isEmpty());
     }
 
     @Test
@@ -341,7 +342,8 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
-                .andExpect(jsonPath("$.id").value(game.getId()));
+                .andExpect(jsonPath("$.id").value(game.getId()))
+                .andExpect(jsonPath("$.turnNumber").value(0));
 
         // and
         verify(mailService).sendYourTurnEmail(secondUserAccount.getEmail(), game.getName());

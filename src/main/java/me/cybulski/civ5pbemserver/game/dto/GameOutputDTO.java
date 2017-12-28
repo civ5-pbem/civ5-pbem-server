@@ -26,4 +26,5 @@ public class GameOutputDTO {
     private String currentlyMovingPlayer;
     private Instant lastMoveFinished;
     private Boolean isSaveGameValidationEnabled;
+    private Integer turnNumber;
 }

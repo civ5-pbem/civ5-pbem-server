@@ -38,6 +38,7 @@ class GameToGameDTOConverter implements Converter<Game, GameOutputDTO> {
                                           .map(GameTurn::getCreatedAt)
                                           .orElse(null))
                 .isSaveGameValidationEnabled(game.getShouldSaveGameFilesBeValidated())
+                .turnNumber(game.getCurrentGameTurn().map(GameTurn::getTurnNumber).orElse(null))
                 .build();
     }
 
