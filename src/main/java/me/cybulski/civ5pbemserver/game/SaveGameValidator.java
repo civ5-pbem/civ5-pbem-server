@@ -38,8 +38,8 @@ public class SaveGameValidator {
         int calculatedTurnNumber = gameTurn.getTurnNumber();
         int saveGameTurnNumber = parsedData.getTurnNumber();
         if (calculatedTurnNumber != saveGameTurnNumber) {
-            throw new InvalidSaveGameException("Wrong turn number. Should be"
-                                                       + calculatedPlayerNumber
+            throw new InvalidSaveGameException("Wrong turn number. Should be "
+                                                       + calculatedTurnNumber
                                                        + " but is "
                                                        + saveGameTurnNumber);
         }

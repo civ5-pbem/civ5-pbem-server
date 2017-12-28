@@ -196,6 +196,21 @@ public class GameApplicationService {
         return saveGameRepository.loadFile(game, gameTurn.getSaveFilename());
     }
 
+    @PreAuthorize(HAS_ROLE_USER)
+    @Transactional
+    public GameOutputDTO disableValidation(String gameId) {
+        Game game = findGameOrThrow(gameId);
+        UserAccount currentUser = getCurrentUserOrThrow();
+        if (!game.getHost().equals(currentUser)) {
+            throw new NoPermissionToModifyGameException("Only host can start the game!");
+        }
+        game.disableValidation();
+        Consumer<String> emailFunction = email -> mailService.sendSaveGameValidationDisabledEmail(email, game.getName());
+        sendEmailToAllHumanPlayers(game, emailFunction);
+
+        return gameToGameDTOConverter.convert(game);
+    }
+
     private Game findGameOrThrow(String gameId) {
         return gameRepository.findById(gameId).orElseThrow(ResourceNotFoundException::new);
     }
@@ -208,19 +223,6 @@ public class GameApplicationService {
 
         return (game.getHost().equals(userAccount) && PlayerType.AI.equals(foundPlayer.getPlayerType()))
                 || userAccount.equals(foundPlayer.getHumanUserAccount());
-    }
-
-    public GameOutputDTO disableValidation(String gameId) {
-        Game game = findGameOrThrow(gameId);
-        UserAccount currentUser = getCurrentUserOrThrow();
-        if (!game.getHost().equals(currentUser)) {
-            throw new NoPermissionToModifyGameException("Only host can start the game!");
-        }
-        game.disableValidation();
-        Consumer<String> emailFunction = email -> mailService.sendSaveGameValidationDisabledEmail(email, game.getName());
-        sendEmailToAllHumanPlayers(game, emailFunction);
-
-        return gameToGameDTOConverter.convert(game);
     }
 
     private void sendEmailToAllHumanPlayers(Game game, Consumer<String> stringConsumer) {
