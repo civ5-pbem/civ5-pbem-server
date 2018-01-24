@@ -1,9 +1,9 @@
 package me.cybulski.civ5pbemserver.game;
 
 import com.google.common.collect.ImmutableList;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameDTO;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameDTOTestCreator;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
+import me.cybulski.civ5pbemserver.savegame.SaveGameDTOTestCreator;
+import me.cybulski.civ5pbemserver.savegame.SaveGameParser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

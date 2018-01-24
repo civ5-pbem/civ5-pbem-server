@@ -1,6 +1,9 @@
-package me.cybulski.civ5pbemserver.saveparser;
+package me.cybulski.civ5pbemserver.savegame;
 
 import com.google.common.collect.ImmutableList;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerDTO;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerStatus;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package me.cybulski.civ5pbemserver.saveparser;
+package me.cybulski.civ5pbemserver.savegame.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public enum SaveGamePlayerStatus {
 
     private final int code;
 
-    static SaveGamePlayerStatus getForCode(int code) {
+    public static SaveGamePlayerStatus getForCode(int code) {
         return Arrays.stream(SaveGamePlayerStatus.values())
                 .filter(status -> status.getCode() == code)
                 .findFirst()
