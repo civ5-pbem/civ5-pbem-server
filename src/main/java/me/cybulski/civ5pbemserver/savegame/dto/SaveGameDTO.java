@@ -1,4 +1,4 @@
-package me.cybulski.civ5pbemserver.saveparser;
+package me.cybulski.civ5pbemserver.savegame.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

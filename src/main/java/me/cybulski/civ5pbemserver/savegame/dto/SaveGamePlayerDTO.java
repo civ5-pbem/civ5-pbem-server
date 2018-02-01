@@ -1,4 +1,4 @@
-package me.cybulski.civ5pbemserver.saveparser;
+package me.cybulski.civ5pbemserver.savegame.dto;
 
 import lombok.*;
 
@@ -8,10 +8,14 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Setter(AccessLevel.PACKAGE)
+@Setter
 public class SaveGamePlayerDTO {
 
+    /**
+     * Indexed from 0.
+     */
     private int playerNumber;
     private String password;
     private SaveGamePlayerStatus playerStatus;
+    private String playerName;
 }

@@ -1,9 +1,11 @@
 package me.cybulski.civ5pbemserver;
 
+import me.cybulski.civ5pbemserver.game.DynamicSaveGameGenerator;
 import me.cybulski.civ5pbemserver.game.SaveGameSynchronizer;
 import me.cybulski.civ5pbemserver.game.SaveGameValidator;
 import me.cybulski.civ5pbemserver.mail.MailService;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
+import me.cybulski.civ5pbemserver.savegame.SaveGameParser;
+import me.cybulski.civ5pbemserver.savegame.SaveGameWriter;
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +37,13 @@ public abstract class IntegrationTest {
     @MockBean
     protected SaveGameParser saveGameParser;
     @MockBean
+    protected SaveGameWriter saveGameWriter;
+    @MockBean
     protected SaveGameValidator saveGameValidator;
     @MockBean
     protected SaveGameSynchronizer saveGameSynchronizer;
+    @MockBean
+    protected DynamicSaveGameGenerator dynamicSaveGameGenerator;
 
     @SpyBean
     protected MailService mailService;

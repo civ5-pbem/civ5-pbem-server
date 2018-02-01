@@ -1,9 +1,9 @@
 package me.cybulski.civ5pbemserver.game;
 
 import me.cybulski.civ5pbemserver.game.exception.InvalidSaveGameException;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameDTO;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
-import me.cybulski.civ5pbemserver.saveparser.SaveGamePlayerDTO;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
+import me.cybulski.civ5pbemserver.savegame.SaveGameParser;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerDTO;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.Before;
 import org.junit.Rule;

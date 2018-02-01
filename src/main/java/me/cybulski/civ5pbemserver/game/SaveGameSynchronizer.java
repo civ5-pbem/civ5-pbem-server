@@ -3,9 +3,9 @@ package me.cybulski.civ5pbemserver.game;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.exception.ResourceNotFoundException;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameDTO;
-import me.cybulski.civ5pbemserver.saveparser.SaveGameParser;
-import me.cybulski.civ5pbemserver.saveparser.SaveGamePlayerStatus;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
+import me.cybulski.civ5pbemserver.savegame.SaveGameParser;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

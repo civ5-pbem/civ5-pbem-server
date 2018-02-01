@@ -27,6 +27,9 @@ class Player extends BaseEntity {
     @ManyToOne(optional = false)
     private Game game;
 
+    /**
+     * Indexed from 1.
+     */
     private int playerNumber;
 
     @NotNull

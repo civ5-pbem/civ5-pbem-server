@@ -1,5 +1,7 @@
-package me.cybulski.civ5pbemserver.saveparser;
+package me.cybulski.civ5pbemserver.savegame;
 
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerStatus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,13 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class SaveGameParserTest {
 
-    private static final String SAVE_GAMES_ROOT = "save-games/";
+    public static final String SAVE_GAMES_ROOT = "save-games/";
 
     private SaveGameParser subject;
 
     @Before
     public void setUp() {
-        subject = new SaveGameParser();
+        subject = new SaveGameParser(new SaveGameHelper());
     }
 
     @Test
@@ -153,6 +155,20 @@ public class SaveGameParserTest {
         assertPlayer(saveGameDTO, 1, "kot", SaveGamePlayerStatus.DEAD);
         assertPlayer(saveGameDTO, 2, "koty", SaveGamePlayerStatus.HUMAN);
         assertPlayer(saveGameDTO, 3, "", SaveGamePlayerStatus.AI);
+    }
+
+    @Test
+    public void playerNamesAreRead() throws IOException {
+        // given
+        String fileName = "after_1st_player_1st_turn.Civ5Sample";
+
+        // when
+        SaveGameDTO saveGameDTO = subject.parse(getSaveFileInputStream(fileName));
+
+        // then
+        assertThat(saveGameDTO.getPlayers().get(0).getPlayerName()).isEqualTo("Player 1");
+        assertThat(saveGameDTO.getPlayers().get(1).getPlayerName()).isEqualTo("Player 2");
+        assertThat(saveGameDTO.getPlayers().get(2).getPlayerName()).isEqualTo("Player 3");
     }
 
     private void assertPlayer(SaveGameDTO saveGameDTO, int index, String password, SaveGamePlayerStatus playerStatus) {

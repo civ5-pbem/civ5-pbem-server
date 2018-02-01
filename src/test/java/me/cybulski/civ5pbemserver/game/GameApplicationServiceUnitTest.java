@@ -49,6 +49,8 @@ public class GameApplicationServiceUnitTest {
     @Mock
     private SaveGameSynchronizer saveGameSynchronizer;
     @Mock
+    private DynamicSaveGameGenerator dynamicSaveGameGenerator;
+    @Mock
     private MailService mailService;
 
     private GameApplicationService subject;
@@ -74,6 +76,7 @@ public class GameApplicationServiceUnitTest {
                 currentGameTurnValidator,
                 saveGameValidator,
                 saveGameSynchronizer,
+                dynamicSaveGameGenerator,
                 mailService);
     }
 
