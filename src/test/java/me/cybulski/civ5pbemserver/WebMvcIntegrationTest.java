@@ -16,7 +16,7 @@ import java.net.URI;
  * @author Michał Cybulski
  */
 @AutoConfigureMockMvc
-public abstract class WebMvcIntegrationTest extends IntegrationTest{
+public abstract class WebMvcIntegrationTest extends IntegrationTest {
 
     private static final String APPLICATION_JSON = "application/json";
 

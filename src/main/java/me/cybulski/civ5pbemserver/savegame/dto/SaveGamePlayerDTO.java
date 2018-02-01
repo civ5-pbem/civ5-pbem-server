@@ -11,6 +11,9 @@ import lombok.*;
 @Setter
 public class SaveGamePlayerDTO {
 
+    /**
+     * Indexed from 0.
+     */
     private int playerNumber;
     private String password;
     private SaveGamePlayerStatus playerStatus;

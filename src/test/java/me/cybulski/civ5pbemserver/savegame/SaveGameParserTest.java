@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class SaveGameParserTest {
 
-    private static final String SAVE_GAMES_ROOT = "save-games/";
+    public static final String SAVE_GAMES_ROOT = "save-games/";
 
     private SaveGameParser subject;
 

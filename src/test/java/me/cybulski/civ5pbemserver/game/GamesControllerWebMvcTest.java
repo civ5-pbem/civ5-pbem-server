@@ -5,17 +5,23 @@ import me.cybulski.civ5pbemserver.civilization.Civilization;
 import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
+import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
 import me.cybulski.civ5pbemserver.user.TestUserAccountFactory;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.util.TimestampStringMatcher;
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.io.File;
+
 import static me.cybulski.civ5pbemserver.game.GameState.WAITING_FOR_FIRST_MOVE;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -368,8 +374,16 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
     @Test
     public void whenFirstMoveIsDone_thenSecondPlayerCanDownloadSave() throws Exception {
         // given
-        byte[] bytes = "Spring Framework".getBytes();
+        byte[] bytes = "Spring framework".getBytes();
         MockMultipartFile file = prepareFileAndStartGame(bytes);
+
+        // and
+        when(saveGameParser.parse(any())).thenReturn(mock(SaveGameDTO.class));
+        byte[] generatedBytes = "Generated".getBytes();
+        File tmpFile = File.createTempFile("civ5Test", "tmp");
+        FileUtils.writeByteArrayToFile(tmpFile, generatedBytes);
+        when(dynamicSaveGameGenerator.generateSaveGameForNextPlayer(any(), any()))
+                .thenReturn(new FileSystemResource(tmpFile));
 
         // and
         mockMvc.perform(authenticated(multipart("/games/" + game.getId() + "/finish-turn").file(file),
@@ -381,7 +395,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
-                .andExpect(content().bytes(bytes));
+                .andExpect(content().bytes(generatedBytes));
     }
 
     private MockMultipartFile prepareFileAndStartGame(byte[] bytes) throws Exception {

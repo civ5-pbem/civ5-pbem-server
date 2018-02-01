@@ -6,11 +6,11 @@ import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
-import org.springframework.core.io.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -82,8 +82,8 @@ public class GamesController {
     }
 
     @RequestMapping(path = "{gameId}/save-game", method = RequestMethod.GET)
-    public Resource getSaveGame(@PathVariable String gameId) {
-        return gameApplicationService.getSaveGameForTurn(gameId);
+    public void getSaveGame(@PathVariable String gameId, HttpServletResponse httpServletResponse) throws IOException {
+        gameApplicationService.writeDynamicSaveGameForTurn(gameId, httpServletResponse.getOutputStream());
     }
 
     @RequestMapping(path = "{gameId}/disable-validation", method = RequestMethod.POST)

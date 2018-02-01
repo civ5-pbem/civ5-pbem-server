@@ -117,7 +117,7 @@ public class SaveGameWriter {
     }
 
     @Value
-    static class ByteBlock {
+    public static class ByteBlock {
         private int blockIndex;
         private byte[] bytes;
     }
