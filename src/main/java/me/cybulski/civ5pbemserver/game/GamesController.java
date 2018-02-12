@@ -83,7 +83,8 @@ public class GamesController {
 
     @RequestMapping(path = "{gameId}/save-game", method = RequestMethod.GET)
     public void getSaveGame(@PathVariable String gameId, HttpServletResponse httpServletResponse) throws IOException {
-        gameApplicationService.writeDynamicSaveGameForTurn(gameId, httpServletResponse.getOutputStream());
+        long fileSize = gameApplicationService.writeDynamicSaveGameForTurn(gameId, httpServletResponse.getOutputStream());
+        httpServletResponse.setHeader("Content-Length", Long.toString(fileSize));
     }
 
     @RequestMapping(path = "{gameId}/disable-validation", method = RequestMethod.POST)

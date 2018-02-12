@@ -190,7 +190,7 @@ public class GameApplicationService {
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
-    public void writeDynamicSaveGameForTurn(String gameId, OutputStream targetOutputStream) throws IOException {
+    public long writeDynamicSaveGameForTurn(String gameId, OutputStream targetOutputStream) throws IOException {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
         currentGameTurnValidator.checkCurrentTurnOrThrow(game, currentUser);
@@ -202,12 +202,14 @@ public class GameApplicationService {
                 originalSaveGame.getFile());
 
         InputStream inputStream = dynamicSaveGame.getInputStream();
-        IOUtils.copy(inputStream, targetOutputStream);
+        long fileSize = IOUtils.copy(inputStream, targetOutputStream);
         inputStream.close();
         targetOutputStream.close();
 
         dynamicSaveGame.getFile().deleteOnExit();
         dynamicSaveGame.getFile().delete();
+
+        return fileSize;
     }
 
     @PreAuthorize(HAS_ROLE_USER)
