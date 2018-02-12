@@ -395,6 +395,7 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         // then
         resultActions
                 .andExpect(status().is(200))
+                .andExpect(header().longValue("Content-Length", generatedBytes.length))
                 .andExpect(content().bytes(generatedBytes));
     }
 
