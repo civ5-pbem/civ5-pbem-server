@@ -12,7 +12,6 @@ import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import me.cybulski.civ5pbemserver.mail.MailService;
 import me.cybulski.civ5pbemserver.user.UserAccount;
 import me.cybulski.civ5pbemserver.user.UserAccountApplicationService;
-import org.apache.commons.io.IOUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +21,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -190,26 +187,17 @@ public class GameApplicationService {
 
     @PreAuthorize(HAS_ROLE_USER)
     @Transactional
-    public long writeDynamicSaveGameForTurn(String gameId, OutputStream targetOutputStream) throws IOException {
+    public Resource generateDynamicSaveGameForTurn(String gameId) throws IOException {
         Game game = findGameOrThrow(gameId);
         UserAccount currentUser = getCurrentUserOrThrow();
         currentGameTurnValidator.checkCurrentTurnOrThrow(game, currentUser);
 
         GameTurn gameTurn = game.getCurrentGameTurn().get();
         Resource originalSaveGame = saveGameRepository.loadFile(game, gameTurn.getSaveFilename());
-        Resource dynamicSaveGame = dynamicSaveGameGenerator.generateSaveGameForNextPlayer(
+
+        return dynamicSaveGameGenerator.generateSaveGameForNextPlayer(
                 gameTurn,
                 originalSaveGame.getFile());
-
-        InputStream inputStream = dynamicSaveGame.getInputStream();
-        long fileSize = IOUtils.copy(inputStream, targetOutputStream);
-        inputStream.close();
-        targetOutputStream.close();
-
-        dynamicSaveGame.getFile().deleteOnExit();
-        dynamicSaveGame.getFile().delete();
-
-        return fileSize;
     }
 
     @PreAuthorize(HAS_ROLE_USER)

@@ -6,12 +6,17 @@ import me.cybulski.civ5pbemserver.game.dto.ChangePlayerTypeInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.ChooseCivilizationInputDTO;
 import me.cybulski.civ5pbemserver.game.dto.GameOutputDTO;
 import me.cybulski.civ5pbemserver.game.dto.NewGameInputDTO;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -83,8 +88,18 @@ public class GamesController {
 
     @RequestMapping(path = "{gameId}/save-game", method = RequestMethod.GET)
     public void getSaveGame(@PathVariable String gameId, HttpServletResponse httpServletResponse) throws IOException {
-        long fileSize = gameApplicationService.writeDynamicSaveGameForTurn(gameId, httpServletResponse.getOutputStream());
-        httpServletResponse.setHeader("Content-Length", Long.toString(fileSize));
+        Resource generatedSaveGame =  gameApplicationService.generateDynamicSaveGameForTurn(gameId);
+        File saveGameFile = generatedSaveGame.getFile();
+        httpServletResponse.setHeader("Content-Length", Long.toString(saveGameFile.length()));
+
+        InputStream inputStream = generatedSaveGame.getInputStream();
+        OutputStream targetOutputStream = httpServletResponse.getOutputStream();
+        IOUtils.copy(inputStream, targetOutputStream);
+        inputStream.close();
+        targetOutputStream.close();
+
+        saveGameFile.deleteOnExit();
+        saveGameFile.delete();
     }
 
     @RequestMapping(path = "{gameId}/disable-validation", method = RequestMethod.POST)
