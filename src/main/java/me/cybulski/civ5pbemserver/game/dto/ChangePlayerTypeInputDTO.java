@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  */
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class ChangePlayerTypeInputDTO {
     @NotNull
