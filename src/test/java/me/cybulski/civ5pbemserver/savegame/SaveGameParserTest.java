@@ -2,6 +2,7 @@ package me.cybulski.civ5pbemserver.savegame;
 
 import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
 import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerStatus;
+import me.cybulski.civ5pbemserver.savegame.exception.CannotParseSaveGameException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Michał Cybulski
@@ -179,5 +181,25 @@ public class SaveGameParserTest {
 
     private File getSaveFileInputStream(String fileName) {
         return new File(this.getClass().getClassLoader().getResource(SAVE_GAMES_ROOT + fileName).getFile());
+    }
+
+    @Test
+    public void whenBadBinaryFileIsBeingParsed_thenADedicatedExceptionIsThrown() throws IOException {
+        // given
+        String filePath = "wrong-save-games/bad-save-game.bin";
+        File badSaveFile = new File(this.getClass().getClassLoader().getResource(filePath).getFile());
+
+        // when
+        assertThatThrownBy(() -> subject.parse(badSaveFile)).isInstanceOf(CannotParseSaveGameException.class);
+    }
+
+    @Test
+    public void whenTooShortFileIsBeingParsed_thenADedicatedExceptionIsThrown() throws IOException {
+        // given
+        String filePath = "wrong-save-games/short-file.txt";
+        File badSaveFile = new File(this.getClass().getClassLoader().getResource(filePath).getFile());
+
+        // when
+        assertThatThrownBy(() -> subject.parse(badSaveFile)).isInstanceOf(CannotParseSaveGameException.class);
     }
 }
