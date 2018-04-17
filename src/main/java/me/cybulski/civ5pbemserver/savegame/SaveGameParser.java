@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.savegame.dto.SaveGameDTO;
 import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerDTO;
 import me.cybulski.civ5pbemserver.savegame.dto.SaveGamePlayerStatus;
+import me.cybulski.civ5pbemserver.savegame.exception.CannotParseSaveGameException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -59,6 +60,8 @@ public class SaveGameParser {
                     .playerWhoMoves(playerWhoMoves)
                     .players(players)
                     .build();
+        } catch (IllegalStateException e) {
+            throw new CannotParseSaveGameException("Cannot parse save game", e);
         }
     }
 
@@ -101,6 +104,10 @@ public class SaveGameParser {
         byte[] lengthBytes = new byte[4];
         Assert.state(randomAccessFile.read(lengthBytes) == 4, "Couldn't read 4 bytes");
         int length = saveGameHelper.wrapBytesLittleEndian(lengthBytes).getInt();
+
+        if (length > 1024) {
+            throw new CannotParseSaveGameException("Save game seems malformed, string length to read: " + length);
+        }
 
         byte[] stringBytes = new byte[length];
         Assert.state(randomAccessFile.read(stringBytes) == length, "Couldn't read " + length + " bytes");
