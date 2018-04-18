@@ -68,3 +68,7 @@ task versionNumber {
     }
 }
 classes.dependsOn versionNumber
+
+springBoot {
+    buildInfo()
+}
