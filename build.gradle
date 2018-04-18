@@ -15,7 +15,7 @@ buildscript {
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
-    id 'org.liquibase.gradle' version '1.2.4'
+    id 'pl.allegro.tech.build.axion-release' version '1.9.0'
 }
 
 apply plugin: 'java'
@@ -24,7 +24,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'me.cybulski'
-version = '0.2.2'
+project.version = scmVersion.version
 sourceCompatibility = 1.8
 
 repositories {
@@ -50,22 +50,21 @@ dependencies {
     testCompile('org.springframework.security:spring-security-test')
 }
 
-liquibase {
-    activities {
-        main {
-            changeLogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
-            url 'jdbc:h2:./data/db;FILE_LOCK=NO'
-            username 'civ5'
-            password 'civ5'
-        }
-    }
-
-    runList = 'main'
-}
-
 jacocoTestReport {
     reports {
         xml.enabled = true
         html.enabled = true
     }
 }
+
+scmVersion {
+    // Dry run & local only release
+    localOnly = true // never connect to remote
+}
+
+task versionNumber {
+    doLast {
+        new File("build/version.txt").withWriter { out -> out.println project.version }
+    }
+}
+classes.dependsOn versionNumber
