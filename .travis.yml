@@ -1,4 +1,36 @@
 language: java
+java:
+  - "8"
 
-after_success:
-- ./gradlew jacocoTestReport coveralls
+services:
+  - docker
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+jobs:
+  include:
+    - stage: test
+      after_success:
+        - ./gradlew jacocoTestReport coveralls
+    - stage: release
+      script: ./gradlew build
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        file_glob: true
+        file: build/libs/*
+        skip_cleanup: true
+        on:
+          tags: true
+
+
+stages:
+  - build
+  - name: release
+    if: tag =~ ^release-
