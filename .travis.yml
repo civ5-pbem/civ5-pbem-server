@@ -19,18 +19,27 @@ jobs:
       after_success:
         - ./gradlew jacocoTestReport coveralls
     - stage: release
-      script: ./gradlew build
+      script: ./gradlew build -x test
+      after_success:
+        - export APP_VERSION=$(cat build/version.txt)
+        - export RELEASE_NAME=$(echo "Version $APP_VERSION")
+        - if [[ $TRAVIS_TAG =~ ^.*-alpha$ ]]; then export PRE_RELEASE=true; else export PRE_RELEASE=false; fi
+        - cd docker && ./prepare-docker-context.sh && ./publish-latest.sh && cd $TRAVIS_BUILD_DIR
       deploy:
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
+        name: $RELEASE_NAME
+        prerelease: $PRE_RELEASE
         file_glob: true
         file: build/libs/*
         skip_cleanup: true
         on:
-          tags: true
-
+          all_branches: true
+          condition: $TRAVIS_TAG =~ ^release-.*$
+      after_deploy:
+        - cd docker && ./publish-release-version.sh && cd $TRAVIS_BUILD_DIR
 
 stages:
-  - build
+  - test
   - name: release
-    if: tag =~ ^release-
+    if: type = push AND ( branch = master OR tag =~ ^release-.*$ OR branch =~ ^release/.*$ )
