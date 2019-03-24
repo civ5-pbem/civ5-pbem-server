@@ -19,7 +19,6 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-@Transactional(readOnly = true)
 class UserDetailsProvider {
 
     private final UserAccountApplicationService userAccountApplicationService;
