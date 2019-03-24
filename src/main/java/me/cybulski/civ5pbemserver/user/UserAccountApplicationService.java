@@ -48,15 +48,18 @@ public class UserAccountApplicationService {
         });
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserAccount> findUserByEmail(@NonNull String email) {
         return userAccountRepository.findByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserAccount> findUserByToken(@NonNull String accessToken) {
         return userAccountRepository.findByCurrentAccessToken(accessToken)
                        .map(UserAccount::confirmRegistration);
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserAccount> getCurrentUserAccount() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
