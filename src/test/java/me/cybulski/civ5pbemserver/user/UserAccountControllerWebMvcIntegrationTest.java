@@ -141,7 +141,7 @@ public class UserAccountControllerWebMvcIntegrationTest extends WebMvcIntegratio
                 userAccountWithNextToken.getNextAccessToken()));
 
         // then
-        finishProcessActions
+        finishProcessActions.andExpect(status().is(200))
                 .andExpect(jsonPath("$.email").value(userAccount.getEmail()))
                 .andExpect(jsonPath("$.username").value(userAccount.getUsername()))
                 .andExpect(jsonPath("$.roles.length()").value(1))
