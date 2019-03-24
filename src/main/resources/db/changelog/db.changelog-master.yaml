@@ -559,3 +559,17 @@ databaseChangeLog:
             constraints:
             - constraint:
                 nullable: false
+- changeSet:
+    id: 1553455891000-19
+    author: michal@cybulski.me
+    changes:
+    - addColumn:
+        tableName: USER_ACCOUNT
+        columns:
+        - column:
+            name: NEXT_ACCESS_TOKEN
+            type: VARCHAR(255)
+    - addUniqueConstraint:
+        tableName: USER_ACCOUNT
+        columnNames: NEXT_ACCESS_TOKEN
+        constraintName: UK_USER_ACCOUNT_NEXT_ACCESS_TOKEN

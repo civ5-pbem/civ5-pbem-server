@@ -23,7 +23,12 @@ public class CivilizationControllerWebMvcTest extends WebMvcIntegrationTest {
     @Before
     public void setUp() {
         // setting up a user
-        sampleUserAccount = testUserAccountFactory.createNewUserAccount("sample@test.com", "sampleUser");
+        sampleUserAccount = testUserAccountFactory.instance()
+                .withUsername("sampleUser")
+                .withEmail("sample@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build();
         testEntityManager.persistAndFlush(sampleUserAccount);
     }
 

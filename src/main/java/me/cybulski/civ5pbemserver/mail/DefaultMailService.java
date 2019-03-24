@@ -65,6 +65,26 @@ public class DefaultMailService implements MailService {
                         "You will be notified when it's your turn.\n"));
     }
 
+    @Override
+    public void sendResetTokenEmail(String emailAddress, String nextAccessToken) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Reset access token process started",
+                "Hello,\n\n" +
+                        "it appears that you have requested a new access token: " + nextAccessToken + "\n" +
+                        "If you didn't request it, then just please ignore this message.\n"));
+    }
+
+    @Override
+    public void confirmResetTokenEmail(String emailAddress) {
+        mailSender.send(prepareMail(
+                emailAddress,
+                "[Civ 5] Reset access token process finished",
+                "Hello,\n\n" +
+                        "you have successfully finished the reset password process.\n" +
+                        "Please use the new token from now on.\n"));
+    }
+
     protected SimpleMailMessage prepareMail(String emailAddress, String subject, String mailContent) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(emailAddress);

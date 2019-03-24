@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnegative;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,21 @@ public class UserAccountApplicationService {
         mailService.sendRegistrationConfirmationEmail(newUserAccount.getEmail(), newUserAccount.getCurrentAccessToken());
 
         return newUserAccount;
+    }
+
+    public void startResetTokenProcess(@NonNull String email) {
+        findUserByEmail(email).ifPresent(userAccount -> {
+            userAccount.startResetToken();
+            mailService.sendResetTokenEmail(email, userAccount.getNextAccessToken());
+        });
+    }
+
+    public Optional<UserAccount> finishResetTokenProcess(@NonNull String nextAccessToken) {
+        return userAccountRepository.findByNextAccessToken(nextAccessToken).map(userAccount -> {
+            userAccount.finishResetToken();
+            mailService.confirmResetTokenEmail(userAccount.getEmail());
+            return userAccount;
+        });
     }
 
     public Optional<UserAccount> findUserByEmail(@NonNull String email) {

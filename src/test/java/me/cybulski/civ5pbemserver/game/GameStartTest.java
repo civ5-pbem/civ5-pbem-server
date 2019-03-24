@@ -29,7 +29,12 @@ public class GameStartTest extends BaseGameTest {
     @Before
     public void setUp() {
         testGameCreator = new TestGameCreator(gameRepository);
-        hostUserAccount = new TestUserAccountFactory().createNewUserAccount("host@test.com", "hostUser");
+        hostUserAccount = new TestUserAccountFactory().instance()
+                .withUsername("hostUser")
+                .withEmail("host@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build();
         subject = testGameCreator.createNewTestGame(hostUserAccount, MapSize.DUEL);
     }
 
@@ -45,7 +50,12 @@ public class GameStartTest extends BaseGameTest {
     @Test
     public void whenThereAreOnlyAiAndClosedLeft_thenGameCanBeStarted() {
         // given
-        UserAccount secondUser = new TestUserAccountFactory().createNewUserAccount("second@test.com", "secondUser");
+        UserAccount secondUser = new TestUserAccountFactory().instance()
+                .withUsername("secondUser")
+                .withEmail("second@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build();
 
         // and
         subject.joinGame(secondUser);

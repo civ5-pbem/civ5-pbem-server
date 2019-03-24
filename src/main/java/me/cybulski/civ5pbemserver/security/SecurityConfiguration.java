@@ -27,6 +27,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     .antMatchers(
                             "/user-accounts/register",
+                            "/user-accounts/reset-access-token",
                             "/user-accounts/current").permitAll()
                     .anyRequest().fullyAuthenticated()
                 .and()
