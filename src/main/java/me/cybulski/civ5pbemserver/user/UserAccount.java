@@ -6,6 +6,7 @@ import me.cybulski.civ5pbemserver.jpa.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class UserAccount extends BaseEntity {
     private String username;
 
     @Getter
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> roles;
 
     @NotNull
