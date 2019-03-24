@@ -10,6 +10,6 @@ import java.util.Optional;
 interface UserAccountRepository extends JpaRepository<UserAccount, String> {
 
     Optional<UserAccount> findByEmail(String email);
-
     Optional<UserAccount> findByCurrentAccessToken(String currentAccessToken);
+    Optional<UserAccount> findByNextAccessToken(String nextAccessToken);
 }

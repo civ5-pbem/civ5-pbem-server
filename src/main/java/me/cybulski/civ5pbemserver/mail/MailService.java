@@ -14,4 +14,8 @@ public interface MailService {
     void sendYouWereKickedEmail(String emailAddress, String gameName);
 
     void sendGameJustStarted(String emailAddress, String gameName);
+
+    void sendResetTokenEmail(String emailAddress, String nextAccessToken);
+
+    void confirmResetTokenEmail(String emailAddress);
 }

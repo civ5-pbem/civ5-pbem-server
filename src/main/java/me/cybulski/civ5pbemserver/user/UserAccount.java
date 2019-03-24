@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Michał Cybulski
@@ -39,11 +40,24 @@ public class UserAccount extends BaseEntity {
     @Getter
     private String currentAccessToken;
 
+    @Column(unique = true)
+    @Getter
+    private String nextAccessToken;
+
     @Getter
     private boolean registrationConfirmed;
 
     UserAccount confirmRegistration() {
         registrationConfirmed = true;
         return this;
+    }
+
+    void startResetToken() {
+        nextAccessToken = UUID.randomUUID().toString();
+    }
+
+    void finishResetToken() {
+        currentAccessToken = nextAccessToken;
+        nextAccessToken = null;
     }
 }

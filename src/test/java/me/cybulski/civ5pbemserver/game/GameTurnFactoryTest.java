@@ -40,8 +40,18 @@ public class GameTurnFactoryTest {
     public void testCreatingTurns() {
         // given
         TestUserAccountFactory testUserAccountFactory = new TestUserAccountFactory();
-        UserAccount host = testUserAccountFactory.createNewUserAccount("host@test.com", "hostUser");
-        UserAccount secondUser = testUserAccountFactory.createNewUserAccount("second@test.com", "secondUser");
+        UserAccount host = testUserAccountFactory.instance()
+                .withUsername("hostUser")
+                .withEmail("host@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build();
+        UserAccount secondUser = testUserAccountFactory.instance()
+                .withUsername("secondUser")
+                .withEmail("second@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build();
 
         // and
         Game game = new TestGameCreator(gameRepository).createNewTestGame(host, MapSize.TINY);

@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import me.cybulski.civ5pbemserver.user.dto.CurrentUserOutputDTO;
 import me.cybulski.civ5pbemserver.user.dto.RegisterInputDTO;
 import me.cybulski.civ5pbemserver.user.dto.RegisterOutputDTO;
+import me.cybulski.civ5pbemserver.user.dto.ResetAccessTokenDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +40,13 @@ class UserAccountController {
                        .email(newUserAccount.getEmail())
                        .username(newUserAccount.getUsername())
                        .build();
+    }
+
+    @Transactional
+    @RequestMapping(path = "reset-access-token", method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity resetAccessToken(@RequestBody @Validated ResetAccessTokenDTO resetAccessTokenDTO) {
+        userAccountApplicationService.startResetTokenProcess(resetAccessTokenDTO.getEmail());
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(path = "current", method = RequestMethod.GET)

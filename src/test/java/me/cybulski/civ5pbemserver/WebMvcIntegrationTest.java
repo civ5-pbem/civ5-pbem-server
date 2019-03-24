@@ -51,4 +51,9 @@ public abstract class WebMvcIntegrationTest extends IntegrationTest {
                                                           UserAccount userAccount) {
         return builder.header("Access-Token", userAccount.getCurrentAccessToken());
     }
+
+    protected MockHttpServletRequestBuilder authenticatedWithAccessToken(MockHttpServletRequestBuilder builder,
+                                                                         String accessToken) {
+        return builder.header("Access-Token", accessToken);
+    }
 }

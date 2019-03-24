@@ -46,8 +46,18 @@ public class GamesControllerWebMvcTest extends WebMvcIntegrationTest {
         testGameCreator = new TestGameCreator(gameRepository);
 
         // setting up the users
-        hostUserAccount = testUserAccountFactory.createNewUserAccount("host@test.com", "hostUser");
-        secondUserAccount = testUserAccountFactory.createNewUserAccount("second@test.com", "secondUser");
+        hostUserAccount = testUserAccountFactory.instance()
+                .withUsername("hostUser")
+                .withEmail("host@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build(testEntityManager);
+        secondUserAccount = testUserAccountFactory.instance()
+                .withUsername("secondUser")
+                .withEmail("second@test.com")
+                .withConfirmedRegistration()
+                .toBuildStep()
+                .build(testEntityManager);
         testEntityManager.persistAndFlush(hostUserAccount);
         testEntityManager.persistAndFlush(secondUserAccount);
 

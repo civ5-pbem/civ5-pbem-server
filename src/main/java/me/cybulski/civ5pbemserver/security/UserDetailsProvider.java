@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * @author Michał Cybulski
@@ -24,9 +25,12 @@ class UserDetailsProvider {
     private final UserAccountApplicationService userAccountApplicationService;
 
     public UserDetails loadUserByAccessToken(String accessToken) {
-        return userAccountApplicationService.findUserByToken(accessToken)
-                       .map(this::convertToUser)
-                       .orElseThrow(() -> new BadCredentialsException("Wrong access token value"));
+        Optional<UserAccount> user = userAccountApplicationService.findUserByToken(accessToken);
+        if (!user.isPresent()) {
+            user = userAccountApplicationService.finishResetTokenProcess(accessToken);
+        }
+        return user.map(this::convertToUser)
+                   .orElseThrow(() -> new BadCredentialsException("Wrong access token value"));
     }
 
     private User convertToUser(UserAccount userAccount) {
