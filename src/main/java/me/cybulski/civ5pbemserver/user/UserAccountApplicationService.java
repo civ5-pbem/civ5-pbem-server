@@ -8,8 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Nonnegative;
 import java.util.Optional;
 
 /**
@@ -23,6 +23,7 @@ public class UserAccountApplicationService {
     private final UserAccountRepository userAccountRepository;
     private final MailService mailService;
 
+    @Transactional
     public UserAccount registerUserAccount(@NonNull String email, String username) {
         UserAccount newUserAccount = userAccountRepository.save(userAccountFactory.createUserAccount(email, username));
         mailService.sendRegistrationConfirmationEmail(newUserAccount.getEmail(), newUserAccount.getCurrentAccessToken());
@@ -30,6 +31,7 @@ public class UserAccountApplicationService {
         return newUserAccount;
     }
 
+    @Transactional
     public void startResetTokenProcess(@NonNull String email) {
         findUserByEmail(email).ifPresent(userAccount -> {
             userAccount.startResetToken();
@@ -37,6 +39,7 @@ public class UserAccountApplicationService {
         });
     }
 
+    @Transactional
     public Optional<UserAccount> finishResetTokenProcess(@NonNull String nextAccessToken) {
         return userAccountRepository.findByNextAccessToken(nextAccessToken).map(userAccount -> {
             userAccount.finishResetToken();
